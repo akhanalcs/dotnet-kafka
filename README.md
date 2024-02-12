@@ -96,7 +96,32 @@ broker1 is the leader of Partition 1 and and broker 2 is follower of Partition 1
 
 There's 1 lead partition and N-1 followers. N is the replication factor.
 
+## Create projects
+### Clone this repo down
+### Create a new sln file
+```bash
+Ashishs-MacBook-Pro:dotnet-kafka ashishkhanal$ dotnet new sln
+```
+### Add a web api project as Producer
+<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/e309d0df-7de6-4fce-a199-467cdcd5bf50">
 
+### Add a console app as Consumer
+<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/25394bc5-984c-4eaf-a071-3cb20a8fec59">
+
+### Install dependencies
+Manage Nuget Packages
+
+<img width="400" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/7ba0251a-8099-4a36-aed4-b2de91b089d2">
+
+Install it in both projects
+
+<img width="850" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/b85f2175-ac38-4a30-9588-190d444171ff">
+
+## Local Kafka cluster setup
+### Install confluent cli
+```bash
+brew install confluentinc/tap/cli
+```
 
 
 
