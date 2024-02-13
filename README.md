@@ -71,14 +71,11 @@ Imagine running those broker 1,2,3 pods inside a Kubernetes cluster. Now you hav
 
 ### Cluster
 A cluster in Kafka is a group of servers (nodes) working together for three reasons:
-1. Speed (low latency)
-   
+1. Speed (low latency)  
     Several data streams can be processed by separate servers, which decreases the latency of data delivery.
-2. Durability
-
+2. Durability  
    Data is replicated across multiple servers, so if one fails, another server has the data backed up.
-3. Scalability
-   
+3. Scalability  
    Kafka also balances the load across multiple servers to provide scalability.  
 
 ### Replication
@@ -96,7 +93,139 @@ broker1 is the leader of Partition 1 and and broker 2 is follower of Partition 1
 
 There's 1 lead partition and N-1 followers. N is the replication factor.
 
+## Create projects
+### Clone this repo down
+### Create a new sln file
+```bash
+Ashishs-MacBook-Pro:dotnet-kafka ashishkhanal$ dotnet new sln
+```
+### Add a web api project as Producer
+<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/e309d0df-7de6-4fce-a199-467cdcd5bf50">
 
+### Add a console app as Consumer
+<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/25394bc5-984c-4eaf-a071-3cb20a8fec59">
 
+### Install dependencies
+Manage Nuget Packages
+
+<img width="400" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/7ba0251a-8099-4a36-aed4-b2de91b089d2">
+
+Install it in both projects
+
+<img width="850" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/b85f2175-ac38-4a30-9588-190d444171ff">
+
+## Local Kafka cluster setup
+### Install confluent cli
+```bash
+brew install confluentinc/tap/cli
+```
+
+Check it was installed
+```bash
+Ashishs-MacBook-Pro:dotnet-kafka ashishkhanal$ confluent version
+confluent - Confluent CLI
+
+Version:     v3.48.1
+Git Ref:     e86e352ee
+Build Date:  2024-01-25T23:40:47Z
+Go Version:  go1.21.5 X:boringcrypto (darwin/amd64)
+Development: false
+```
+
+### Start the Kafka broker
+```bash
+confluent local kafka start
+```
+
+#### Troubleshooting
+You'll get this error
+```bash
+Error: Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+```
+
+It went away after I checked the option of allowing docker socket to be used.
+
+<img width="850" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/1313b420-df4f-4981-a72d-88ef5cff3b61">
+
+Like this:
+
+<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/cea97d6a-30cd-4388-8b28-6bd11a223881">
+
+---
+
+Now, it doesn't print any ports, just shows this:
+```bash
+Ashishs-MacBook-Pro:dotnet-kafka ashishkhanal$ confluent local kafka start
+The local commands are intended for a single-node development environment only, NOT for production usage. See more: https://docs.confluent.io/current/cli/index.html
+```
+
+Set environment variable `CONFLUENT_HOME`:
+
+Check where the `confluent` cli is installed
+```bash
+Ashishs-MacBook-Pro:dotnet-kafka ashishkhanal$ brew info confluentinc/tap/cli
+/usr/local/Cellar/cli/3.48.1 (4 files, 57.5MB) *
+```
+
+Open your shell profile
+```bash
+vim ~/.bash_profile
+```
+
+Add this to the file
+```bash
+# For Confluent
+export CONFLUENT_HOME="/usr/local/Cellar/cli/3.48.1"
+export PATH=$PATH:$CONFLUENT_HOME/bin
+```
+
+Hit `Esc`, type `:wq` and hit enter to save and quit.
+
+Reload the bash profile file using the source command:
+```bash
+source ~/.bash_profile
+```
+
+I gave up on local setup at this time as I could not make it work even after scouring the interent. So now on to Confluent cloud.
+## Run Kafka in Confluent Cloud
+### Signup
+[Go to Signup page](https://www.confluent.io/confluent-cloud/tryfree/)
+
+I signed up through my Azure account as Pasy As You Go
+
+<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/14b0a2ef-e70f-4b33-b879-50d08f882d86">
+
+Created Confluent org in my Azure account
+
+<img width="750" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/bb0f35be-f95f-461d-abd6-0c2ae5029b1c">
+
+It appears under the RG I created it under
+
+<img width="650" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/a3f31fd2-b305-4b0c-b2b8-c86da7c2aafc">
+
+Now go to Confluent cloud by clicking Launch
+
+<img width="300" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/672d9b73-cd46-4a59-9f23-a5c613362b00">
+
+### Create cluster
+Go to Home
+
+<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/23081af9-9797-4b86-8e59-6ebe5d686162">
+
+Add Cluster -> Create cluster -> Choose "Basic" cluster type
+
+<img width="600" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/8b188706-57f3-410e-8af9-de32b2aba91b">
+
+Click "Launch cluster"
+
+<img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/ea734e4b-1f4a-4bea-992c-2d03d8d7d021">
+
+### Grab Bootstrap server address
+Home -> Environments -> default -> cluster_0 -> Cluster Settings -> Endpoints
+
+<img width="750" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f520ce07-ac02-46fe-818b-b682d456a10a">
+
+## Configuration
+Home -> Environments -> default -> cluster_0 -> API Keys -> Create key
 
 
