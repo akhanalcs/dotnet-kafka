@@ -186,3 +186,46 @@ Reload the bash profile file using the source command:
 source ~/.bash_profile
 ```
 
+I gave up on local setup at this time as I could not make it work even after scouring the interent. So now on to Confluent cloud.
+## Run Kafka in Confluent Cloud
+### Signup
+[Go to Signup page](https://www.confluent.io/confluent-cloud/tryfree/)
+
+I signed up through my Azure account as Pasy As You Go
+
+<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/14b0a2ef-e70f-4b33-b879-50d08f882d86">
+
+Created Confluent org in my Azure account
+
+<img width="750" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/bb0f35be-f95f-461d-abd6-0c2ae5029b1c">
+
+It appears under the RG I created it under
+
+<img width="650" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/a3f31fd2-b305-4b0c-b2b8-c86da7c2aafc">
+
+Now go to Confluent cloud by clicking Launch
+
+<img width="300" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/672d9b73-cd46-4a59-9f23-a5c613362b00">
+
+### Create cluster
+Go to Home
+
+<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/23081af9-9797-4b86-8e59-6ebe5d686162">
+
+Add Cluster -> Create cluster -> Choose "Basic" cluster type
+
+<img width="600" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/8b188706-57f3-410e-8af9-de32b2aba91b">
+
+Click "Launch cluster"
+
+<img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/ea734e4b-1f4a-4bea-992c-2d03d8d7d021">
+
+### Grab Bootstrap server address
+Home -> Environments -> default -> cluster_0 -> Cluster Settings -> Endpoints
+
+<img width="750" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f520ce07-ac02-46fe-818b-b682d456a10a">
+
+## Configuration
+Home -> Environments -> default -> cluster_0 -> API Keys -> Create key
+
+
