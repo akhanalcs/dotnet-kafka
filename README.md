@@ -71,14 +71,11 @@ Imagine running those broker 1,2,3 pods inside a Kubernetes cluster. Now you hav
 
 ### Cluster
 A cluster in Kafka is a group of servers (nodes) working together for three reasons:
-1. Speed (low latency)
-   
+1. Speed (low latency)  
     Several data streams can be processed by separate servers, which decreases the latency of data delivery.
-2. Durability
-
+2. Durability  
    Data is replicated across multiple servers, so if one fails, another server has the data backed up.
-3. Scalability
-   
+3. Scalability  
    Kafka also balances the load across multiple servers to provide scalability.  
 
 ### Replication
@@ -123,5 +120,68 @@ Install it in both projects
 brew install confluentinc/tap/cli
 ```
 
+Check it was installed
+```bash
+Ashishs-MacBook-Pro:dotnet-kafka ashishkhanal$ confluent version
+confluent - Confluent CLI
 
+Version:     v3.48.1
+Git Ref:     e86e352ee
+Build Date:  2024-01-25T23:40:47Z
+Go Version:  go1.21.5 X:boringcrypto (darwin/amd64)
+Development: false
+```
+
+### Start the Kafka broker
+```bash
+confluent local kafka start
+```
+
+#### Troubleshooting
+You'll get this error
+```bash
+Error: Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+```
+
+It went away after I checked the option of allowing docker socket to be used.
+
+<img width="850" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/1313b420-df4f-4981-a72d-88ef5cff3b61">
+
+Like this:
+
+<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/cea97d6a-30cd-4388-8b28-6bd11a223881">
+
+---
+
+Now, it doesn't print any ports, just shows this:
+```bash
+Ashishs-MacBook-Pro:dotnet-kafka ashishkhanal$ confluent local kafka start
+The local commands are intended for a single-node development environment only, NOT for production usage. See more: https://docs.confluent.io/current/cli/index.html
+```
+
+Set environment variable `CONFLUENT_HOME`:
+
+Check where the `confluent` cli is installed
+```bash
+Ashishs-MacBook-Pro:dotnet-kafka ashishkhanal$ brew info confluentinc/tap/cli
+/usr/local/Cellar/cli/3.48.1 (4 files, 57.5MB) *
+```
+
+Open your shell profile
+```bash
+vim ~/.bash_profile
+```
+
+Add this to the file
+```bash
+# For Confluent
+export CONFLUENT_HOME="/usr/local/Cellar/cli/3.48.1"
+```
+
+Hit `Esc`, type `:wq` and hit enter to save and quit.
+
+Reload the bash profile file using the source command:
+```bash
+source ~/.bash_profile
+```
 
