@@ -176,6 +176,7 @@ Add this to the file
 ```bash
 # For Confluent
 export CONFLUENT_HOME="/usr/local/Cellar/cli/3.48.1"
+export PATH=$PATH:$CONFLUENT_HOME/bin
 ```
 
 Hit `Esc`, type `:wq` and hit enter to save and quit.
