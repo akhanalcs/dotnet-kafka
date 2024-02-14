@@ -8,6 +8,7 @@ It has numerous use cases, including distributed logging, stream processing and 
 1. [Data streaming with Apache Kafka](https://developer.confluent.io/)
 2. [Kafka 101](https://developer.confluent.io/courses/apache-kafka/events/)
 3. [How Kafka works](https://www.confluent.io/blog/apache-kafka-intro-how-kafka-works/)(Great!)
+4. [confluent kafka dotnet examples](https://github.com/confluentinc/confluent-kafka-dotnet/tree/master/examples)
 
 ## Terminology
 ### Event
@@ -105,6 +106,35 @@ Ashishs-MacBook-Pro:dotnet-kafka ashishkhanal$ dotnet new sln
 ### Add a console app as Consumer
 <img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/25394bc5-984c-4eaf-a071-3cb20a8fec59">
 
+#### Setup appsettings.json
+[Reference](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration#alternative-hosting-approach)
+
+Install `Microsoft.Extensions.Hosting` package.
+
+Add `appsettings.json`, and set these options:
+- Build action: Content  
+- Copy to output directory: Copy if newer
+
+And use it
+https://github.com/akhanalcs/dotnet-kafka/blob/2fb1f8c16f5b5fbee85caa1645b42940d8f670fb/Consumer/Program.cs#L3-L10
+
+#### Use user-secrets to store API key and secret
+[Reference](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-8.0&tabs=windows#enable-secret-storage)
+
+```bash
+dotnet user-secrets init
+```
+
+This command adds a `UserSecretsId` element, populated with a GUID, to the project file.
+
+If you want the Producer to also access secrets pointed by this Id, copy this element into the Producer's project file as well.
+
+Now you can store API keys and secrets in there without it being checked into source control.
+
+Right click the project -> Tools -> [.NET User Secrets](https://plugins.jetbrains.com/plugin/10183--net-core-user-secrets)
+
+<img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/507002f2-4517-45f6-b285-8b87a30e981f">
+
 ### Install dependencies
 Manage Nuget Packages
 
@@ -113,6 +143,11 @@ Manage Nuget Packages
 Install it in both projects
 
 <img width="850" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/b85f2175-ac38-4a30-9588-190d444171ff">
+
+## Install Java
+Go to [Java Downloads](https://www.oracle.com/java/technologies/downloads/) and install the latest JDK. (JDK 21 as of Feb 2024).
+
+[TODO: Will come back to this later]
 
 ## Local Kafka cluster setup
 ### Install confluent cli
@@ -228,4 +263,20 @@ Home -> Environments -> default -> cluster_0 -> Cluster Settings -> Endpoints
 ## Configuration
 Home -> Environments -> default -> cluster_0 -> API Keys -> Create key
 
+<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/06aa5e29-ea4f-4727-abdf-4b00d92b0474">
+
+## Create Topic
+[Reference](https://developer.confluent.io/courses/apache-kafka-for-dotnet/producing-messages-hands-on/#create-a-new-topic)
+
+A topic is an immutable, append-only log of events. Usually, a topic is comprised of the same kind of events, e.g., in this guide we create a topic for retail purchases.
+
+Create a new topic, purchases, which you will use to produce and consume events.
+
+Home -> Environments -> default -> cluster_0 -> Topics -> Create topic
+
+<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/12acfdb3-20a2-4a30-b781-cfe15512e318">
+
+
+- Truth: That comports to reality.
+- Maybe true there's a diamond shaped exactly like my head on MARS, but there's no way for us to know that. so we can't really say "oh it's true that there's diamon shaped my head in MARS"
 
