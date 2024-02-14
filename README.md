@@ -9,6 +9,7 @@ It has numerous use cases, including distributed logging, stream processing and 
 2. [Kafka 101](https://developer.confluent.io/courses/apache-kafka/events/)
 3. [How Kafka works](https://www.confluent.io/blog/apache-kafka-intro-how-kafka-works/)(Great!)
 4. [confluent kafka dotnet examples](https://github.com/confluentinc/confluent-kafka-dotnet/tree/master/examples)
+5. [Apache Kafka for .NET developers](https://developer.confluent.io/courses/apache-kafka-for-dotnet/overview/)(Great!)
 
 ## Terminology
 ### Event
@@ -18,7 +19,7 @@ Kafka encourages you to see the world as sequences of events, which it models as
 
 Events are immutable, as it is (sometimes tragically) impossible to change the past.
 
-### Topic (category of messages)
+### Topic (Think of it as category of messages, table, log etc.)
 Because the world is filled with so many events, Kafka gives us a means to organize them and keep them in order: topics.  
 A topic is an ordered log of events.
 
@@ -116,7 +117,7 @@ Add `appsettings.json`, and set these options:
 - Copy to output directory: Copy if newer
 
 And use it
-https://github.com/akhanalcs/dotnet-kafka/blob/2fb1f8c16f5b5fbee85caa1645b42940d8f670fb/Consumer/Program.cs#L3-L10
+https://github.com/akhanalcs/dotnet-kafka/blob/7313b07edd0d5e2a947b813aae2598ab596f298b/Consumer/Program.cs#L4-L10
 
 #### Use user-secrets to store API key and secret
 [Reference](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-8.0&tabs=windows#enable-secret-storage)
@@ -135,6 +136,10 @@ Right click the project -> Tools -> [.NET User Secrets](https://plugins.jetbrain
 
 <img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/507002f2-4517-45f6-b285-8b87a30e981f">
 
+Put your secrets here
+
+<img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/9168a6f6-5fc2-4a64-82ac-6db5ff2f3262">
+
 ### Install dependencies
 Manage Nuget Packages
 
@@ -147,7 +152,7 @@ Install it in both projects
 ## Install Java
 Go to [Java Downloads](https://www.oracle.com/java/technologies/downloads/) and install the latest JDK. (JDK 21 as of Feb 2024).
 
-[TODO: Will come back to this later]
+[Not required, so not doing it now]
 
 ## Local Kafka cluster setup
 ### Install confluent cli
@@ -221,7 +226,11 @@ Reload the bash profile file using the source command:
 source ~/.bash_profile
 ```
 
-I gave up on local setup at this time as I could not make it work even after scouring the interent. So now on to Confluent cloud.
+It works at this point. For more details, check out my [StackOverflow question](https://stackoverflow.com/q/77985757/8644294).
+
+<img width="950" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/9a9b15c5-4a0f-4d5c-8249-3883810c1f7c">
+
+I gave Confluent Cloud a try instead of local cluster at this time.
 ## Run Kafka in Confluent Cloud
 ### Signup
 [Go to Signup page](https://www.confluent.io/confluent-cloud/tryfree/)
@@ -242,12 +251,56 @@ Now go to Confluent cloud by clicking Launch
 
 <img width="300" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/672d9b73-cd46-4a59-9f23-a5c613362b00">
 
-### Create cluster
+### Create environment
 Go to Home
 
-<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/23081af9-9797-4b86-8e59-6ebe5d686162">
+Environments -> Add cloud environment
 
-Add Cluster -> Create cluster -> Choose "Basic" cluster type
+<img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/a569d5b1-58e8-411a-8984-b281a69bcb6f">
+
+Stream Governance Packages -> Essentials -> Begin configuration
+
+#### Select which cloud and region you want to create your Schema Registry and Stream Catalog in (i.e. where you will be storing the metadata)
+<img width="650" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/2c57f793-801d-4f67-a07c-07a233ec53a0">
+
+-> Enable
+
+#### View it using CLI
+```bash
+confluent login
+```
+
+<img width="200" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/653fcab1-692d-4c27-b8ae-42ae9561d94f">
+
+CLI shows the successful login
+
+<img width="1000" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/6646fbe7-56c9-4e2c-a913-00c0e1e861b3">
+
+```bash
+confluent environment list
+```
+
+<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/8efab508-ae07-44d3-9d59-bba678c8630f">
+
+Set the new environment I just created as the active environment:
+```bash
+confluent environment use env-19vow5
+```
+
+Now the `*` has changed
+
+<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/3f73b8fa-4c31-40dd-90aa-5260aec5400c">
+
+### Create cluster
+<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f1070fff-b389-409f-baf9-27078918b2b2">
+
+-> Create cluster on my own
+
+Create cluster -> Basic -> Begin configuration
+
+<img width="200" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/de308359-313f-4346-a51b-0caf12e2470e">
+
+-> Create cluster
 
 <img width="600" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/8b188706-57f3-410e-8af9-de32b2aba91b">
 
@@ -275,6 +328,7 @@ Create a new topic, purchases, which you will use to produce and consume events.
 Home -> Environments -> default -> cluster_0 -> Topics -> Create topic
 
 <img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/12acfdb3-20a2-4a30-b781-cfe15512e318">
+
 
 
 - Truth: That comports to reality.
