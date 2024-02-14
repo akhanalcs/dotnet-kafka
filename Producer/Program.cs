@@ -1,9 +1,14 @@
+using Confluent.Kafka;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+var producerConfig = builder.Configuration.GetSection("KafkaProducer").Get<ProducerConfig>();
+using var producer = new ProducerBuilder<string, Biometrics>(producerConfig).Build();
 
 var app = builder.Build();
 
@@ -16,29 +21,22 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
+app.Logger.LogInformation("Adding Routes");
+app.MapPost("/biometrics", (Biometrics metrics) =>
     {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
+        var message = new Message<string, Biometrics>
+        {
+            Key = metrics.DeviceId.ToString(),
+            Value = metrics
+        };
+        
+        return TypedResults.Accepted($"/biometrics/{metrics.DeviceId}");
     })
-    .WithName("GetWeatherForecast")
+    .WithName("RecordMeasurements")
     .WithOpenApi();
 
+app.Logger.LogInformation("Starting the app");
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+record Biometrics(Guid DeviceId, List<HeartRate> HeartRates);
+record HeartRate(DateTime DateTime, int Value);

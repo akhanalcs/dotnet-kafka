@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 using Confluent.Kafka;
 
-using var host = Host.CreateApplicationBuilder(args).Build();
-
+//using var host = Host.CreateApplicationBuilder(args).Build();
 //var config = host.Services.GetRequiredService<IConfiguration>(); // This works like below EXCEPT the user secrets part.
 var config = new ConfigurationBuilder()
   .AddJsonFile("appsettings.json")
