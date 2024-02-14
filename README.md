@@ -258,10 +258,12 @@ Environments -> Add cloud environment
 
 <img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/a569d5b1-58e8-411a-8984-b281a69bcb6f">
 
+-> Create
+
 Stream Governance Packages -> Essentials -> Begin configuration
 
 #### Select which cloud and region you want to create your Schema Registry and Stream Catalog in (i.e. where you will be storing the metadata)
-<img width="650" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/2c57f793-801d-4f67-a07c-07a233ec53a0">
+<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/2c57f793-801d-4f67-a07c-07a233ec53a0">
 
 -> Enable
 
@@ -296,18 +298,17 @@ Now the `*` has changed
 
 -> Create cluster on my own
 
-Create cluster -> Basic -> Begin configuration
+Create cluster -> Basic
 
 <img width="200" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/de308359-313f-4346-a51b-0caf12e2470e">
 
--> Create cluster
+-> Begin configuration
 
 <img width="600" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/8b188706-57f3-410e-8af9-de32b2aba91b">
 
-Click "Launch cluster"
-
 <img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/ea734e4b-1f4a-4bea-992c-2d03d8d7d021">
 
+-> Launch cluster
 ### Grab Bootstrap server address
 Home -> Environments -> default -> cluster_0 -> Cluster Settings -> Endpoints
 
