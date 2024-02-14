@@ -305,7 +305,7 @@ Create cluster -> Basic
 -> Begin configuration
 
 <img width="600" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/8b188706-57f3-410e-8af9-de32b2aba91b">
-
+<br>
 <img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/ea734e4b-1f4a-4bea-992c-2d03d8d7d021">
 
 -> Launch cluster
