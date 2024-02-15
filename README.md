@@ -2,6 +2,8 @@
 Apache Kafka is an event streaming platform used to collect, store and process real time data streams at scale.  
 It has numerous use cases, including distributed logging, stream processing and Pub-Sub Messaging.
 
+
+
 <img width="700" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/19978d3c-3f9c-4474-9a3b-995b5ea437ed">
 
 ## Helpful Links
@@ -466,6 +468,25 @@ Home -> Environments -> kafka-with-dotnet -> cluster_0 -> Topics
 
 <img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/974b3b19-fa64-4402-8e40-8b2b3b48cfc1">
 
+## Serialization & Deserialization
+The message producer is created by providing two types. 
+```cs
+new ProducerBuilder<TypeofKey, TypeofValue>(config)
+```
+The first type represents the Key of the message while the second is for the Value.  
+These types can be simple types, such as strings or integers, but they can also be more complex types like a custom class or struct. 
+
+However, Kafka itself doesn't directly understand these types, it just operates with blobs of data in byte form. This implies that we need to convert our data into an array of bytes before sending it to Kafka if it is a complex object.
+
+<img width="650" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/528a11e9-a910-4ffa-b6ae-afe2e4997195">
+
+To register a serializer for the message **value**, we use the `SetValueSerializer` method on the ProducerBuilder.  
+For eg:
+```cs
+new ProducerBuilder<string, Biometrics>(producerConfig)
+    .SetValueSerializer(new JsonSerializer<Biometrics>(schemaRegistry))
+    .Build();
+```
 
 
 
