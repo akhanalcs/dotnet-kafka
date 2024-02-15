@@ -414,34 +414,38 @@ Once we're sure we want the messages to be sent, it's a good idea to call the Fl
 // It's often better to produce multiple messages into a batch prior to calling Flush.
 producer.Flush();
 ```
+
+## Create Topic
+[Reference](https://developer.confluent.io/courses/apache-kafka-for-dotnet/producing-messages-hands-on/#create-a-new-topic)
+
+A topic is an immutable, append-only log of events. Usually, a topic is comprised of the same kind of events.
+
+<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/8338369a-158d-4932-8d82-3b301a85a628">
+
+Create a new topic, `RawBiometricsImported`, which you will use to produce and consume events.
+
+<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/324d25d8-a71f-4485-86b0-5470d45370d6">
+
+-> Create with defaults
+
+When asked to **Define a data contract** select **Skip**.
+
+## Populate config file using API Key file you downloaded earlier
+- The Kafka.BootstrapServers is the Bootstrap server in the file.
+- The Kafka.SaslUsername is the key value in the file.
+- The Kafka.SaslPassword is the secret value in the file.
+- SchemaRegistry.URL is the Stream Governance API endpoint url.<br>
+  <img width="200" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/6a7404d5-b3ec-47b7-9a03-883b53c4ea01">
+- SchemaRegistry.BasicAuthUserInfo is `<key>:<secret>` from the API Key file you downloaded for the Schema Registry.
+
+Store user name and passwords inside `secrets.json` and other details in `appsettings.json`.
+
 ## Produce messages
 Go to the web api you created earlier.
 
 It will work as a simple REST endpoint that accepts data from a fitness tracker in the form of strings and pushes it to Kafka with no intermediate processing.
 
 In the long run, this may be dangerous because it could allow a malfunctioning device to push invalid data into our stream. We probably want to perform a minimal amount of validation, prior to pushing the data. We'll do that later.
-
-
-### Grab Bootstrap server address
-Home -> Environments -> default -> cluster_0 -> Cluster Settings -> Endpoints
-
-<img width="750" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f520ce07-ac02-46fe-818b-b682d456a10a">
-
-## Configuration
-Home -> Environments -> default -> cluster_0 -> API Keys -> Create key
-
-<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/06aa5e29-ea4f-4727-abdf-4b00d92b0474">
-
-## Create Topic
-[Reference](https://developer.confluent.io/courses/apache-kafka-for-dotnet/producing-messages-hands-on/#create-a-new-topic)
-
-A topic is an immutable, append-only log of events. Usually, a topic is comprised of the same kind of events, e.g., in this guide we create a topic for retail purchases.
-
-Create a new topic, purchases, which you will use to produce and consume events.
-
-Home -> Environments -> default -> cluster_0 -> Topics -> Create topic
-
-<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/12acfdb3-20a2-4a30-b781-cfe15512e318">
 
 
 
