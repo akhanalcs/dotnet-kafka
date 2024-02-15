@@ -1,4 +1,7 @@
 using Confluent.Kafka;
+using Confluent.SchemaRegistry;
+using Confluent.SchemaRegistry.Serdes; //Serdes means Serializer and Deserializer
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,9 +10,28 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-const string biometricsImportedTopicName = "RawBiometricsImported";
-var producerConfig = builder.Configuration.GetSection("KafkaProducer").Get<ProducerConfig>();
-builder.Services.AddSingleton(new ProducerBuilder<string, string>(producerConfig).Build());
+// Populate config objects
+builder.Services.Configure<ProducerConfig>(builder.Configuration.GetSection("KafkaProducer")); // OR var producerConfig = builder.Configuration.GetSection("KafkaProducer").Get<ProducerConfig>();
+builder.Services.Configure<SchemaRegistryConfig>(builder.Configuration.GetSection("KafkaSchemaRegistry"));
+
+const string biometricsImportedTopicName = "BiometricsImported";
+
+// Producer
+builder.Services.AddSingleton<IProducer<string, Biometrics>>(sp =>
+{
+    var config = sp.GetRequiredService<IOptions<ProducerConfig>>();
+    var schemaRegistryClient = sp.GetRequiredService<ISchemaRegistryClient>();
+    return new ProducerBuilder<string, Biometrics>(config.Value)
+        .SetValueSerializer(new JsonSerializer<Biometrics>(schemaRegistryClient))
+        .Build();
+});
+
+// Schema Registry
+builder.Services.AddSingleton<ISchemaRegistryClient>(sp =>
+{
+    var config = sp.GetRequiredService<IOptions<SchemaRegistryConfig>>();
+    return new CachedSchemaRegistryClient(config.Value);
+});
 
 var app = builder.Build();
 
