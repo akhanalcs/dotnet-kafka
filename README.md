@@ -8,6 +8,8 @@ It has numerous use cases, including distributed logging, stream processing and 
 1. [Data streaming with Apache Kafka](https://developer.confluent.io/)
 2. [Kafka 101](https://developer.confluent.io/courses/apache-kafka/events/)
 3. [How Kafka works](https://www.confluent.io/blog/apache-kafka-intro-how-kafka-works/)(Great!)
+4. [confluent kafka dotnet examples](https://github.com/confluentinc/confluent-kafka-dotnet/tree/master/examples)
+5. [Apache Kafka for .NET developers](https://developer.confluent.io/courses/apache-kafka-for-dotnet/overview/)(Great!)
 
 ## Terminology
 ### Event
@@ -17,7 +19,7 @@ Kafka encourages you to see the world as sequences of events, which it models as
 
 Events are immutable, as it is (sometimes tragically) impossible to change the past.
 
-### Topic (category of messages)
+### Topic (Think of it as category of messages, table, log etc.)
 Because the world is filled with so many events, Kafka gives us a means to organize them and keep them in order: topics.  
 A topic is an ordered log of events.
 
@@ -105,6 +107,39 @@ Ashishs-MacBook-Pro:dotnet-kafka ashishkhanal$ dotnet new sln
 ### Add a console app as Consumer
 <img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/25394bc5-984c-4eaf-a071-3cb20a8fec59">
 
+#### Setup appsettings.json
+[Reference](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration#alternative-hosting-approach)
+
+Install `Microsoft.Extensions.Hosting` package.
+
+Add `appsettings.json`, and set these options:
+- Build action: Content  
+- Copy to output directory: Copy if newer
+
+And use it
+https://github.com/akhanalcs/dotnet-kafka/blob/7313b07edd0d5e2a947b813aae2598ab596f298b/Consumer/Program.cs#L4-L10
+
+#### Use user-secrets to store API key and secret
+[Reference](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-8.0&tabs=windows#enable-secret-storage)
+
+```bash
+dotnet user-secrets init
+```
+
+This command adds a `UserSecretsId` element, populated with a GUID, to the project file.
+
+If you want the Producer to also access secrets pointed by this Id, copy this element into the Producer's project file as well.
+
+Now you can store API keys and secrets in there without it being checked into source control.
+
+Right click the project -> Tools -> [.NET User Secrets](https://plugins.jetbrains.com/plugin/10183--net-core-user-secrets)
+
+<img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/507002f2-4517-45f6-b285-8b87a30e981f">
+
+Put your secrets here
+
+<img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/9168a6f6-5fc2-4a64-82ac-6db5ff2f3262">
+
 ### Install dependencies
 Manage Nuget Packages
 
@@ -113,6 +148,11 @@ Manage Nuget Packages
 Install it in both projects
 
 <img width="850" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/b85f2175-ac38-4a30-9588-190d444171ff">
+
+## Install Java
+Go to [Java Downloads](https://www.oracle.com/java/technologies/downloads/) and install the latest JDK. (JDK 21 as of Feb 2024).
+
+[Not required, so not doing it now]
 
 ## Local Kafka cluster setup
 ### Install confluent cli
@@ -186,7 +226,11 @@ Reload the bash profile file using the source command:
 source ~/.bash_profile
 ```
 
-I gave up on local setup at this time as I could not make it work even after scouring the interent. So now on to Confluent cloud.
+It works at this point. For more details, check out my [StackOverflow question](https://stackoverflow.com/q/77985757/8644294).
+
+<img width="950" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/9a9b15c5-4a0f-4d5c-8249-3883810c1f7c">
+
+I gave Confluent Cloud a try instead of local cluster at this time.
 ## Run Kafka in Confluent Cloud
 ### Signup
 [Go to Signup page](https://www.confluent.io/confluent-cloud/tryfree/)
@@ -207,25 +251,204 @@ Now go to Confluent cloud by clicking Launch
 
 <img width="300" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/672d9b73-cd46-4a59-9f23-a5c613362b00">
 
-### Create cluster
+### Create environment
 Go to Home
 
-<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/23081af9-9797-4b86-8e59-6ebe5d686162">
+Environments -> Add cloud environment
 
-Add Cluster -> Create cluster -> Choose "Basic" cluster type
+<img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/a569d5b1-58e8-411a-8984-b281a69bcb6f">
+
+-> Create
+
+Stream Governance Packages -> Essentials -> Begin configuration
+
+#### Select which cloud and region you want to create your Schema Registry and Stream Catalog in (i.e. where you will be storing the metadata)
+<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/2c57f793-801d-4f67-a07c-07a233ec53a0">
+
+-> Enable
+
+#### View it using CLI
+```bash
+confluent login
+```
+
+<img width="200" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/653fcab1-692d-4c27-b8ae-42ae9561d94f">
+
+CLI shows the successful login
+
+<img width="1000" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/6646fbe7-56c9-4e2c-a913-00c0e1e861b3">
+
+```bash
+confluent environment list
+```
+
+<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/8efab508-ae07-44d3-9d59-bba678c8630f">
+
+Set the new environment I just created as the active environment:
+```bash
+confluent environment use env-19vow5
+```
+
+Now the `*` has changed
+
+<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/3f73b8fa-4c31-40dd-90aa-5260aec5400c">
+
+### Create cluster
+<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f1070fff-b389-409f-baf9-27078918b2b2">
+
+-> Create cluster on my own
+
+Create cluster -> Basic
+
+<img width="200" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/de308359-313f-4346-a51b-0caf12e2470e">
+
+-> Begin configuration
 
 <img width="600" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/8b188706-57f3-410e-8af9-de32b2aba91b">
-
-Click "Launch cluster"
-
+<br>
 <img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/ea734e4b-1f4a-4bea-992c-2d03d8d7d021">
 
-### Grab Bootstrap server address
-Home -> Environments -> default -> cluster_0 -> Cluster Settings -> Endpoints
+-> Launch cluster
 
-<img width="750" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f520ce07-ac02-46fe-818b-b682d456a10a">
+### Billing and payment
+Payment details
 
-## Configuration
-Home -> Environments -> default -> cluster_0 -> API Keys -> Create key
+Add coupon code: `DOTNETKAFKA101`
 
+<img width="750" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/b47bd8f5-af4e-43a1-9a24-58a48f6fdc90">
+
+### Add an API key for Kafka cluster (Cluster level)
+We will need an API Key to allow applications to access our cluster.
+
+<img width="600" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/55e85853-d27f-4e01-b5c2-c9c76995f0bc">
+
+-> Create key
+
+<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f94892bd-6027-49d7-aa6e-53702ced8a40">
+
+Global access -> Next
+
+Download and save the key somewhere for future use.
+
+### Add an API key for Schema Registry (Environment level)
+1. From the main menu (top right) or the breadcrumb navigation (top) select **Environments**.
+2. Select the **kafka-with-dotnet** environment.
+3. In the right-hand menu there should be an option to **Add key**. Select it and create a new API Key.
+
+<img width="250" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/63252f75-54ab-4166-9902-f3635e86ba8f">
+<br>
+<img width="250" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f4e92617-719a-42d2-a464-99a603094ae7">
+
+## Kafka Messages
+<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/2c56d72f-9788-437f-9715-2de12d2b3731">
+
+### Event
+A domain event signals something that has happened in the outside world that is of interest to the application.
+
+Events are something that happened in the past. So they are immutable.
+
+Use past tense when naming events.
+
+For eg: UserCreated, UserAddressChanged etc.
+
+### Kafka Message Example
+```cs
+var message = new Message<string, Biometrics>
+{
+  Key = metrics.DeviceId,
+  Value = metrics
+};
+```
+If you care about message ordering, provide key, otherwise it's optional.
+
+In above example, because we're using `DeviceId` as key, all messages of that specific device are handled in order.
+
+Value can be a primitive type such as string or some object that can be serialized into formats such as JSON, Avro or Protobuf.
+
+## Producing messages to a topic
+<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/1d0706c6-5b6e-465f-ba32-2aef3628dd8d">
+
+You can consider the messages being produced by your system to be just another type of API.
+
+Some APIs will be consumed through HTTP while others might be consumed through Kafka.
+
+### Producer Config
+```json
+  "KafkaProducer": {
+    // One or more Kafka brokers each specified by a host and port if necessary.
+    // It will be used to establish the initial connection to the Kafka cluster.
+    // Once connected, additional brokers may become available.
+    "BootstrapServers": "pkc-4rn2p.canadacentral.azure.confluent.cloud:9092",
+    "SecurityProtocol": "SaslSsl",
+    "SaslMechanism": "PLAIN",
+    "SaslUsername": "comes from user-secrets' secrets.json",
+    "SaslPassword": "comes from user-secrets' secrets.json",
+    // Used to identify the producer.
+    // In other words, to give it a name.
+    // Although it's not strictly required, providing a ClientId will make debugging a lot easier.
+    "ClientId": "my-dotnet-kafka"
+  }
+```
+
+Grab the config
+```cs
+var producerConfig = builder.Configuration.GetSection("KafkaProducer").Get<ProducerConfig>();
+```
+
+Create the Producer
+```cs
+using var producer = new ProducerBuilder<string, Biometrics>(producerConfig).Build();
+```
+
+Send the message
+```cs
+var result = await producer.ProduceAsync(BiometricsImportedTopicName, message);
+```
+
+The messages aren't necessarily sent immediately.  
+They may be buffered in memory so that multiple messages can be sent as a batch.  
+Once we're sure we want the messages to be sent, it's a good idea to call the Flush method.
+
+```cs
+// Synchronous method, so it will wait for acknowledgement from broker before continuing
+// It's often better to produce multiple messages into a batch prior to calling Flush.
+producer.Flush();
+```
+
+## Create Topic
+[Reference](https://developer.confluent.io/courses/apache-kafka-for-dotnet/producing-messages-hands-on/#create-a-new-topic)
+
+A topic is an immutable, append-only log of events. Usually, a topic is comprised of the same kind of events.
+
+<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/8338369a-158d-4932-8d82-3b301a85a628">
+
+Create a new topic, `RawBiometricsImported`, which you will use to produce and consume events.
+
+<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/324d25d8-a71f-4485-86b0-5470d45370d6">
+
+-> Create with defaults
+
+When asked to **Define a data contract** select **Skip**.
+
+## Populate config file using API Key file you downloaded earlier
+- The Kafka.BootstrapServers is the Bootstrap server in the file.
+- The Kafka.SaslUsername is the key value in the file.
+- The Kafka.SaslPassword is the secret value in the file.
+- SchemaRegistry.URL is the Stream Governance API endpoint url.<br>
+  <img width="200" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/6a7404d5-b3ec-47b7-9a03-883b53c4ea01">
+- SchemaRegistry.BasicAuthUserInfo is `<key>:<secret>` from the API Key file you downloaded for the Schema Registry.
+
+Store user name and passwords inside `secrets.json` and other details in `appsettings.json`.
+
+## Produce messages
+Go to the web api you created earlier.
+
+It will work as a simple REST endpoint that accepts data from a fitness tracker in the form of strings and pushes it to Kafka with no intermediate processing.
+
+In the long run, this may be dangerous because it could allow a malfunctioning device to push invalid data into our stream. We probably want to perform a minimal amount of validation, prior to pushing the data. We'll do that later.
+
+
+
+- Truth: That comports to reality.
+- Maybe true there's a diamond shaped exactly like my head on MARS, but there's no way for us to know that. so we can't really say "oh it's true that there's diamon shaped my head in MARS"
 
