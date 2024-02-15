@@ -22,6 +22,7 @@ builder.Services.AddSingleton<IProducer<string, Biometrics>>(sp =>
     var config = sp.GetRequiredService<IOptions<ProducerConfig>>();
     var schemaRegistryClient = sp.GetRequiredService<ISchemaRegistryClient>();
     return new ProducerBuilder<string, Biometrics>(config.Value)
+         // Provide a Serializer to the Producer
         .SetValueSerializer(new JsonSerializer<Biometrics>(schemaRegistryClient))
         .Build();
 });
@@ -45,14 +46,13 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.Logger.LogInformation("Adding Routes");
-app.MapPost("/biometrics", async (string metrics, IProducer<string, string> producer) =>
+app.MapPost("/biometrics", async (Biometrics metrics, IProducer<string, Biometrics> producer) =>
     {
-        app.Logger.LogInformation("Accepted Biometrics");
-        var message = new Message<string, string> { Value = metrics };
+        var message = new Message<string, Biometrics> { Key = metrics.DeviceId.ToString(), Value = metrics };
         var result = await producer.ProduceAsync(biometricsImportedTopicName, message);
         producer.Flush();
-
-        return TypedResults.Accepted("", metrics);
+        app.Logger.LogInformation("Accepted Biometrics");
+        return TypedResults.Accepted("", result.Value); // result is of type <string, Biometrics>, so you're just returning the accepted Biometrics
     })
     .WithName("RecordMeasurements")
     .WithOpenApi();
