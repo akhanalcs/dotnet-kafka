@@ -447,6 +447,26 @@ It will work as a simple REST endpoint that accepts data from a fitness tracker 
 
 In the long run, this may be dangerous because it could allow a malfunctioning device to push invalid data into our stream. We probably want to perform a minimal amount of validation, prior to pushing the data. We'll do that later.
 
+Register an instance of `IProducer<string, string>`.   
+We use a singleton because the producer maintains connections that we want to reuse.
+```cs
+var producerConfig = builder.Configuration.GetSection("KafkaProducer").Get<ProducerConfig>();
+builder.Services.AddSingleton(new ProducerBuilder<string, string>(producerConfig).Build());
+```
+
+### Test it
+#### Start the app
+<img width="200" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f7250701-7d04-4477-bead-6c9c5f83db7e">
+
+#### Send a message to the endpoint through Swagger
+<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/a83c9991-e5b9-4256-863a-a9461490aec6">
+
+#### Verify it in the cluster
+Home -> Environments -> kafka-with-dotnet -> cluster_0 -> Topics
+
+<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/974b3b19-fa64-4402-8e40-8b2b3b48cfc1">
+
+
 
 
 - Truth: That comports to reality.
