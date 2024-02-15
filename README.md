@@ -309,6 +309,119 @@ Create cluster -> Basic
 <img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/ea734e4b-1f4a-4bea-992c-2d03d8d7d021">
 
 -> Launch cluster
+
+### Billing and payment
+Payment details
+
+Add coupon code: `DOTNETKAFKA101`
+
+<img width="750" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/b47bd8f5-af4e-43a1-9a24-58a48f6fdc90">
+
+### Add an API key for Kafka cluster (Cluster level)
+We will need an API Key to allow applications to access our cluster.
+
+<img width="600" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/55e85853-d27f-4e01-b5c2-c9c76995f0bc">
+
+-> Create key
+
+<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f94892bd-6027-49d7-aa6e-53702ced8a40">
+
+Global access -> Next
+
+Download and save the key somewhere for future use.
+
+### Add an API key for Schema Registry (Environment level)
+1. From the main menu (top right) or the breadcrumb navigation (top) select **Environments**.
+2. Select the **kafka-with-dotnet** environment.
+3. In the right-hand menu there should be an option to **Add key**. Select it and create a new API Key.
+
+<img width="250" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/63252f75-54ab-4166-9902-f3635e86ba8f">
+<br>
+<img width="250" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f4e92617-719a-42d2-a464-99a603094ae7">
+
+## Kafka Messages
+<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/2c56d72f-9788-437f-9715-2de12d2b3731">
+
+### Event
+A domain event signals something that has happened in the outside world that is of interest to the application.
+
+Events are something that happened in the past. So they are immutable.
+
+Use past tense when naming events.
+
+For eg: UserCreated, UserAddressChanged etc.
+
+### Kafka Message Example
+```cs
+var message = new Message<string, Biometrics>
+{
+  Key = metrics.DeviceId,
+  Value = metrics
+};
+```
+If you care about message ordering, provide key, otherwise it's optional.
+
+In above example, because we're using `DeviceId` as key, all messages of that specific device are handled in order.
+
+Value can be a primitive type such as string or some object that can be serialized into formats such as JSON, Avro or Protobuf.
+
+## Producing messages to a topic
+<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/1d0706c6-5b6e-465f-ba32-2aef3628dd8d">
+
+You can consider the messages being produced by your system to be just another type of API.
+
+Some APIs will be consumed through HTTP while others might be consumed through Kafka.
+
+### Producer Config
+```json
+  "KafkaProducer": {
+    // One or more Kafka brokers each specified by a host and port if necessary.
+    // It will be used to establish the initial connection to the Kafka cluster.
+    // Once connected, additional brokers may become available.
+    "BootstrapServers": "pkc-4rn2p.canadacentral.azure.confluent.cloud:9092",
+    "SecurityProtocol": "SaslSsl",
+    "SaslMechanism": "PLAIN",
+    "SaslUsername": "comes from user-secrets' secrets.json",
+    "SaslPassword": "comes from user-secrets' secrets.json",
+    // Used to identify the producer.
+    // In other words, to give it a name.
+    // Although it's not strictly required, providing a ClientId will make debugging a lot easier.
+    "ClientId": "my-dotnet-kafka"
+  }
+```
+
+Grab the config
+```cs
+var producerConfig = builder.Configuration.GetSection("KafkaProducer").Get<ProducerConfig>();
+```
+
+Create the Producer
+```cs
+using var producer = new ProducerBuilder<string, Biometrics>(producerConfig).Build();
+```
+
+Send the message
+```cs
+var result = await producer.ProduceAsync(BiometricsImportedTopicName, message);
+```
+
+The messages aren't necessarily sent immediately.  
+They may be buffered in memory so that multiple messages can be sent as a batch.  
+Once we're sure we want the messages to be sent, it's a good idea to call the Flush method.
+
+```cs
+// Synchronous method, so it will wait for acknowledgement from broker before continuing
+// It's often better to produce multiple messages into a batch prior to calling Flush.
+producer.Flush();
+```
+## Produce messages
+Go to the web api you created earlier.
+
+It will work as a simple REST endpoint that accepts data from a fitness tracker in the form of strings and pushes it to Kafka with no intermediate processing.
+
+In the long run, this may be dangerous because it could allow a malfunctioning device to push invalid data into our stream. We probably want to perform a minimal amount of validation, prior to pushing the data. We'll do that later.
+
+
 ### Grab Bootstrap server address
 Home -> Environments -> default -> cluster_0 -> Cluster Settings -> Endpoints
 
