@@ -7,8 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+const string biometricsImportedTopicName = "RawBiometricsImported";
 var producerConfig = builder.Configuration.GetSection("KafkaProducer").Get<ProducerConfig>();
-using var producer = new ProducerBuilder<string, Biometrics>(producerConfig).Build();
+builder.Services.AddSingleton(new ProducerBuilder<string, string>(producerConfig).Build());
 
 var app = builder.Build();
 
@@ -22,15 +23,14 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.Logger.LogInformation("Adding Routes");
-app.MapPost("/biometrics", (Biometrics metrics) =>
+app.MapPost("/biometrics", async (string metrics, IProducer<string, string> producer) =>
     {
-        var message = new Message<string, Biometrics>
-        {
-            Key = metrics.DeviceId.ToString(),
-            Value = metrics
-        };
-        
-        return TypedResults.Accepted($"/biometrics/{metrics.DeviceId}");
+        app.Logger.LogInformation("Accepted Biometrics");
+        var message = new Message<string, string> { Value = metrics };
+        var result = await producer.ProduceAsync(biometricsImportedTopicName, message);
+        producer.Flush();
+
+        return TypedResults.Accepted("", metrics);
     })
     .WithName("RecordMeasurements")
     .WithOpenApi();
