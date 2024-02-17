@@ -2,8 +2,6 @@
 Apache Kafka is an event streaming platform used to collect, store and process real time data streams at scale.  
 It has numerous use cases, including distributed logging, stream processing and Pub-Sub Messaging.
 
-
-
 <img width="700" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/19978d3c-3f9c-4474-9a3b-995b5ea437ed">
 
 ## Helpful Links
@@ -487,6 +485,358 @@ new ProducerBuilder<string, Biometrics>(producerConfig)
     .SetValueSerializer(new JsonSerializer<Biometrics>(schemaRegistry))
     .Build();
 ```
+## Schemas and the Schema Registry
+The Confluent Kafka client includes support for three major message formats, including Protobuf, Avro and JSON.
+
+Each of these three formats supports a message schema. Schema is basically a set of rules that outline the exact structure of a message.
+
+These schema can be stored in an external service known as a Schema Registry. The Confluent Cloud built-in Schema Registry is a good choice here.
+
+To make use of the schemas, we can connect our serializers to the Schema Registry.
+
+The serializer will have its own version of the schema that it will use to serialize each message.  
+The first time we try to serialize an object we look for a matching schema in the registry.
+
+If a matching schema is found,the current message and any future ones that use the same schema will be sent to Kafka.
+
+<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/0448c387-860b-4e1b-863a-5808c65ecd93">
+
+However, if no matching schema is found,then any messages that use that schema will be rejected.  
+Essentially, an exception is thrown.  
+This ensures that each message going to Kafka matches the required format.
+
+## Schemas & Serialization
+### Create a new topic
+Create a new topic named `BiometricsImported` (use the default partitions).
+
+Define a data contract -> Create a schema for message values
+
+<img width="500" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/bf734225-8385-4252-b79a-6c9334a41ebb">
+
+-> Create Schema
+
+<img width="600" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/04a1e110-e193-44c0-b6da-fc3c4f8fae09">
+
+Copy paste the above JSON into https://codebeautify.org/jsonviewer and add your fields into it (to ensure you're not messing up the JSON), and paste it back to this page and hit **Create**.
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/myURI.schema.json",
+  "title": "Biometrics",
+  "description": "Biometrics collected from the fitness tracker.",
+  "type": "object",
+  "additionalProperties": false,
+  "definitions": {
+    "HeartRate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "DateTime": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Value": {
+          "format": "int32",
+          "type": "integer"
+        }
+      }
+    }
+  },
+  "properties": {
+    "DeviceId": {
+      "format": "guid",
+      "type": "string",
+      "description": "The string type is used for strings of text."
+    },
+    "HeartRates": {
+      "items": {
+        "$ref": "#/definitions/HeartRate"
+      },
+      "type": "array"
+    },
+    "MaxHeartRate": {
+      "format": "int32",
+      "type": "integer"
+    }
+  }
+}
+```
+
+In above step, essentially you were just mapping these records into a JSON format
+https://github.com/akhanalcs/dotnet-kafka/blob/e05177c04bc471b17fdb081db8afcc952d3473d5/Producer/Program.cs#L41-L42
+
+### Connect the app to Schema Registry
+Add 2 packages:
+https://github.com/akhanalcs/dotnet-kafka/blob/df7850306df39f57b7f89be05a84077d6a773577/Producer/Producer.csproj#L13C1-L14C92
+
+Register an instance of a `ISchemaRegistryClient` using a `new CachedSchemaRegistryClient`
+https://github.com/akhanalcs/dotnet-kafka/blob/df7850306df39f57b7f89be05a84077d6a773577/Producer/Program.cs#L29-L34
+
+### Test it
+Navigate to Swagger page
+
+<img width="200" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/dc04d7e6-0e43-4be8-a929-c570e29a2d77">
+
+Click on `/biometrics` and click "Try it out".
+
+Send the request. It succeeds.
+
+<img width="250" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/a842fba4-eaac-4ab2-acd1-a3155e0848a7">
+
+Check it out in Confluent Cloud.
+
+<img width="650" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/b546a032-9a6b-4997-a7ba-d06e786e1d03">
+
+## Consuming Messages from a Topic
+The job of the consumer is to process each message in a topic.  
+Usually, they're processed one at a time in the order they're received.
+
+<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/e41e8ed4-9ccb-4bf6-8f40-8003e57693eb">
+
+It's like a reader (consumer) reading a book.
+
+The reader gets to decide which books they read and how they read them.  
+Some people might read a book end-to-end while others might jump around, only looking at the sections that interest them.
+
+In the same way, a Kafka consumer can decide what topics they will pay attention to.  
+Within each topic, they often look at every message, perform some processing, and potentially update a database or some other state.  
+However, they may decide that some messages aren't relevant and discard them rather than wasting time on processing.  
+
+<img width="400" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/a84a7f8f-2190-47e0-8147-238eefd8935c">
+
+Remember that when messages are produced to a topic, they're assigned a key.  
+That key is used to separate the topic into multiple partitions.
+
+Within each partition, the order of the messages is guaranteed.  
+However, it's not guaranteed across multiple partitions.
+
+<img width="400" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/10acb37d-0e46-42b2-8ae3-5ca67f311b02">
+
+When we create a consumer, we assign it a group ID.  
+This ID indicates that multiple instances of the consumer all belong to the same group.  
+Kafka will distribute the partitions among the group members.  
+
+This means that in a topic with 30 partitions, you could have up to 30 instances of your consumer all working in parallel.
+
+<img width="500" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/75b87e44-f7ce-45b4-92dc-adb07a975477">
+
+Each member of the group processes separate partitions.
+
+### Configuration
+```json
+  "KafkaConsumer": {
+    "BootstrapServers": "pkc-4rn2p.canadacentral.azure.confluent.cloud:9092",
+    "SecurityProtocol": "SaslSsl",
+    "SaslMechanism": "PLAIN",
+    "ClientId": "my-dotnet-kafka",
+    // To identify multiple consumers that all belong to a single group. (Eg: multiple instances of same microservice)
+    "GroupId": "my-dotnet-kafka-group",
+    // Determines where the consumer should start processing messages if it has no record of a previously committed offset.
+    // In other words, if the consumer is unsure where to start processing messages, it will use this setting.
+    // Setting it to Earliest will cause the consumer to start from the earliest message it hasn't seen yet.
+    // This is a good value to use if you want to ensure that all messages get processed.
+    "AutoOffsetReset": "earliest",
+    // EnableAutoCommit determines whether or not the consumer will automatically commit its offsets.
+    // Committing an offset indicates that the consumer has finished processing a message and doesn't want to receive it again.
+    // If we choose to auto-commit, then the offsets are automatically managed by the consumer.
+    "EnableAutoCommit": true,
+    "SaslUsername": "comes from user-secrets' secrets.json",
+    "SaslPassword": "comes from user-secrets' secrets.json"
+  }
+```
+
+### Subscribing to a topic
+When we are ready to begin consuming messages, we need to subscribe to a topic.  
+This is done using the Subscribe Method on the consumer.  
+It takes either a single topic name or a collection of multiple topic names.  
+This informs the client which topics we want to consume but it doesn't actually start processing messages.
+
+```cs
+consumer.Subscribe(BiometricsImportedTopicName);
+```
+
+### Consuming a message
+To start processing messages, we use the Consume Method.  
+It will grab the next available message from the topic and return it as the result.
+```cs
+  consumer.Subscribe(BiometricsImportedTopicName);
+
+  while(!stoppingToken.IsCancellationRequested)
+  {
+      var result = consumer.Consume(stoppingToken);
+      // Do something with the message. DeviceId: result.Message.Key, Biometrics: result.Message.Value
+  }
+
+  // Close the consumer after you're done
+  consumer.Close();
+```
+
+### Create a background service to work on the message in Consumer project
+[Reference](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-8.0&tabs=visual-studio)
+
+### Setup the Consumer in Program.cs
+[How to register services in Console app](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection-usage#register-services-for-di)
+
+Add necessary packages
+https://github.com/akhanalcs/dotnet-kafka/blob/54cda76ddb80ab3228bc400e46ec418cd3d7b639/Consumer/Consumer.csproj#L14-L15
+
+And the setup in Program.cs
+https://github.com/akhanalcs/dotnet-kafka/blob/54cda76ddb80ab3228bc400e46ec418cd3d7b639/Consumer/Program.cs#L21-L30
+
+### Test it
+We have 1 message in the Topic
+
+<img width="500" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/14e5c215-a0b6-4e5f-a58a-74a2e569d6c8">
+
+The Consumer read it successfully
+
+<img width="500" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/231b46ac-ab86-403d-b2ab-199f50b89a9b">
+
+## Delivery Guarantees & Transactions
+### At least once
+The default behavior of a Kafka consumer is to automatically commit offsets at a given interval.
+```json
+  "KafkaConsumer": {
+    // Other stuffs here
+    // Means that the consumer will receive every message from a topic, but may see duplicates.
+    "EnableAutoCommit": true,
+    "AutoCommitIntervalMs": 5000,
+    "EnableAutoOffsetStore": true
+  },
+```
+
+However, the behavior in .NET is quite different.  
+Let's take a look at a simple example.
+
+Scenario 1
+```cs
+    while (!stoppingToken.IsCancellationRequested)
+    {
+        // When we call consume, the offset for the current message is stored in memory.
+        // A background thread periodically commits the most recently stored offset to Kafka, according to the AutoCommitInterval.
+        var result = consumer.Consume(stoppingToken);
+        Process(result); // CRASH!!
+        // Background commit would have occured here.
+        // 👆If our application crashes BEFORE we commit the offsets, then we'll see the messages again once we recover.
+        // In this scenario, we see all of the messages, but we get duplicates.
+    }
+```
+
+Scenario 2
+```cs
+    while (!stoppingToken.IsCancellationRequested)
+    {
+        var result = consumer.Consume(stoppingToken);
+        // Background commit occurs here.
+        // 👆If our application crashes AFTER we commit the offsets, then the message is lost and won't be recovered.
+        Process(result); // CRASH!!
+    }
+```
+
+If we want to achieve at-least-once processing, we need to manually store the offsets.  
+To do this, we start by disabling automatic offset storage.
+```json
+  "KafkaConsumer": {
+    // Other stuffs here
+    "EnableAutoCommit": true,
+    "AutoCommitIntervalMs": 5000,
+    "EnableAutoOffsetStore": false, // <-- This guy
+  },
+```
+Now the code looks like this
+```cs
+    while (!stoppingToken.IsCancellationRequested)
+    {
+        var result = consumer.Consume(stoppingToken);
+        Process(result); // CRASH!!
+        // When the message is fully processed, we call store offset on the consumer to explicitly store the offset in memory.
+        consumer.StoreOffset(result);
+    }
+```
+
+In the event of a crash, the offset won't have been stored.
+When we recover, we'll see the message again, giving us the at-least-once guarantee we were looking for.
+
+### Effectively once
+In order to achieve effectively-once processing, we need to enable some settings on our producer.
+
+```json
+  "KafkaProducer": {
+    // Other stuffs here
+    "TransactionalId": "dotnet-kafka-producer",
+  },
+```
+
+## Transactional Commits
+In the previous exercise, we implemented a basic consumer for our topic. One key aspect of that **consumer** is that it was set up to do **automatic** commits. As a result, if something failed to process, it may be committed anyway, and the message may be lost.
+
+We are going to switch from automatic commits to **transactional** commits.
+
+As we process the messages, we will produce multiple new messages to a separate topic. We want this to happen in a transactional fashion. Either all of the messages get published, or none of them do.
+
+### Create a new topic
+In Confluent Cloud, create a new topic named `HeartRateZoneReached`.
+
+The type of message it will use is
+```cs
+public record HeartRateZoneReached(Guid DeviceId, HeartRateZone Zone, DateTime DateTime, int HeartRate, int MaxHeartRate);
+```
+
+So use this Schema
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/myURI.schema.json",
+  "title": "HeartRateZoneReached",
+  "type": "object",
+  "description": "Schema for HeartRateZoneReached.",
+  "additionalProperties": false,
+  "definitions": {
+    "HeartRateZone": {
+      "description": "It's an enum that represents HeartRateZone",
+      "type": "integer",
+      "enum": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "x-enumNames": [
+        "None",
+        "Zone1",
+        "Zone2",
+        "Zone3",
+        "Zone4",
+        "Zone5"
+      ]
+    },
+    "properties": {
+      "DateTime": {
+        "format": "date-time",
+        "type": "string"
+      },
+      "DeviceId": {
+        "format": "guid",
+        "type": "string"
+      },
+      "HeartRate": {
+        "format": "int32",
+        "type": "integer"
+      },
+      "MaxHeartRate": {
+        "format": "int32",
+        "type": "integer"
+      },
+      "Zone": {
+        "$ref": "#/definitions/HeartRateZone"
+      }
+    }
+  }
+}
+```
+
 
 
 
