@@ -60,5 +60,5 @@ app.MapPost("/biometrics", async (Biometrics metrics, IProducer<string, Biometri
 app.Logger.LogInformation("Starting the app");
 app.Run();
 
-record Biometrics(Guid DeviceId, List<HeartRate> HeartRates);
+record Biometrics(Guid DeviceId, List<HeartRate> HeartRates, int MaxHeartRate);
 record HeartRate(DateTime DateTime, int Value);

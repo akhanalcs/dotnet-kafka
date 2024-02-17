@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Consumer.Domain;
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
@@ -37,6 +38,3 @@ var logger = host.Services.GetRequiredService<ILogger<Program>>();
 logger.LogInformation("Host created. Now running it.");
 
 await host.RunAsync();
-
-public record Biometrics(Guid DeviceId, List<HeartRate> HeartRates);
-public record HeartRate(DateTime DateTime, int Value);

@@ -1,4 +1,5 @@
 using Confluent.Kafka;
+using Consumer.Domain;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
