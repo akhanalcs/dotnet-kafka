@@ -1,5 +1,14 @@
-﻿using Microsoft.Extensions.Configuration;
-using Confluent.Kafka;
+﻿using Confluent.Kafka;
+using Confluent.Kafka.SyncOverAsync;
+using Confluent.SchemaRegistry.Serdes;
+using Consumer.Workers;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
+HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
 //using var host = Host.CreateApplicationBuilder(args).Build();
 //var config = host.Services.GetRequiredService<IConfiguration>(); // This works like below EXCEPT the user secrets part.
@@ -9,6 +18,25 @@ var config = new ConfigurationBuilder()
   .AddUserSecrets<Program>()
   .Build();
 
-var consumerConfig = config.GetSection("KafkaConsumer").Get<ConsumerConfig>()!;
+// Populate consumer config
+builder.Services.Configure<ConsumerConfig>(config.GetSection("KafkaConsumer"));
 
-Console.ReadLine();
+builder.Services.AddSingleton<IConsumer<string, Biometrics>>(sp =>
+{
+  var consumerConfig = sp.GetRequiredService<IOptions<ConsumerConfig>>();
+  return new ConsumerBuilder<string, Biometrics>(consumerConfig.Value)
+    .SetValueDeserializer(new JsonDeserializer<Biometrics>().AsSyncOverAsync())
+    .Build();
+});
+
+builder.Services.AddHostedService<HeartRateZoneWorker>();
+
+using IHost host = builder.Build();
+// https://learn.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line#create-logs-in-main
+var logger = host.Services.GetRequiredService<ILogger<Program>>();
+logger.LogInformation("Host created. Now running it.");
+
+await host.RunAsync();
+
+public record Biometrics(Guid DeviceId, List<HeartRate> HeartRates);
+public record HeartRate(DateTime DateTime, int Value);

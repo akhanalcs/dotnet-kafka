@@ -52,7 +52,7 @@ app.MapPost("/biometrics", async (Biometrics metrics, IProducer<string, Biometri
         var result = await producer.ProduceAsync(biometricsImportedTopicName, message);
         producer.Flush();
         app.Logger.LogInformation("Accepted Biometrics");
-        return TypedResults.Accepted("", result.Value); // result is of type <string, Biometrics>, so you're just returning the accepted Biometrics
+        return TypedResults.Accepted("", result.Value); // result.Value is just message.Value
     })
     .WithName("RecordMeasurements")
     .WithOpenApi();
