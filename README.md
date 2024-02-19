@@ -699,7 +699,7 @@ The default behavior of a Kafka consumer is to automatically commit offsets at a
   "KafkaConsumer": {
     // Other stuffs here
     // Means that the consumer will receive every message from a topic, but may see duplicates.
-    "EnableAutoCommit": true,
+    "EnableAutoCommit": true, // Default
     "AutoCommitIntervalMs": 5000,
     "EnableAutoOffsetStore": true
   },
@@ -757,20 +757,38 @@ Now the code looks like this
 In the event of a crash, the offset won't have been stored.
 When we recover, we'll see the message again, giving us the at-least-once guarantee we were looking for.
 
-### Effectively once
+### Effectively once (using the combination of Idempotency and Transaction)
 In order to achieve effectively-once processing, we need to enable some settings on our producer.
 
+Normally, when the producer experiences a write failure, it will retry the message.  
+This can result in duplicates. However, if we enable **idempotence**, then a unique sequence number is included with each write.
+If the same sequence number is sent twice, then it will be de-duplicated.
+
 ```json
+  // Consumer/appsettings.json
   "KafkaProducer": {
     // Other stuffs here
-    "TransactionalId": "dotnet-kafka-producer",
+    "ClientId": "BiometricsService",
+    "EnableIdempotence": "true" // <-- This guy
+    // Config added for Transactional commits
+    // Identify the instance of our application with a TransactionId.
+    "TransactionalId": "BiometricsService" // <-- This guy
   },
+  "KafkaConsumer": {
+    // Other stuffs here
+    "ClientId": "BiometricsService",
+    "GroupId": "BiometricsService",
+    // Config changed for Transactional commits. Changed from default true to false.
+    "EnableAutoCommit": false, // <-- This guy
+    // Default is ReadCommitted. Ensures that the consumers are only reading fully committed message in a Transaction.
+    "IsolationLevel": "ReadCommitted" // <-- This guy
+  }
 ```
 
 ## Transactional Commits
 In the previous exercise, we implemented a basic consumer for our topic. One key aspect of that **consumer** is that it was set up to do **automatic** commits. As a result, if something failed to process, it may be committed anyway, and the message may be lost.
 
-We are going to switch from automatic commits to **transactional** commits.
+We are going to switch from automatic commits to **transactional** commits (```json"EnableAutoCommit": false```).
 
 As we process the messages, we will produce multiple new messages to a separate topic. We want this to happen in a transactional fashion. Either all of the messages get published, or none of them do.
 
@@ -836,6 +854,22 @@ So use this Schema
   }
 }
 ```
+
+Now our Consumer will also produce `HeartRateZoneReached` messages, so we need to add Producer configuration in Consumer project.
+```json
+  // Consumer/appsettings.json
+  "KafkaProducer": {
+    // Other stuffs here
+    "ClientId": "BiometricsService",
+    "EnableIdempotence": "true" // <-- This guy
+    // Config added for Transactional commits
+    // Identify the instance of our application with a TransactionId.
+    "TransactionalId": "BiometricsService" // <-- This guy
+  }
+```
+
+### Implement Heart Rate Zones
+
 
 
 
