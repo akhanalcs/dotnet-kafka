@@ -10,7 +10,7 @@ public static class HeartRateExtensions
 
     public static HeartRateZone GetHeartRateZone(this HeartRate heartRate, int maxHeartRate)
     {
-        var percentage = heartRate.Value / maxHeartRate;
+        var percentage = (double)heartRate.Value / maxHeartRate; // Integer division, if heartRate.Value is less than maxHeartRate, it'll result in 0. So just cast either of those to have a floating point division.
         var zone = HeartRateZone.None;
 
         if (percentage >= Zone5Threshold) zone = HeartRateZone.Zone5;

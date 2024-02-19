@@ -54,7 +54,10 @@ builder.Services.AddSingleton<ISchemaRegistryClient>(sp =>
 
 builder.Services.AddHostedService<HeartRateZoneWorker>();
 
+// A host is an object that encapsulates an app's resources and lifetime functionality, such as DI, Logging, Configuration, App shutdown, IHostedService implementations etc.
+// The host and console app are not the same thing - the host is just a part that runs inside your console application.
 using IHost host = builder.Build();
+
 // https://learn.microsoft.com/en-us/dotnet/core/extensions/logging?tabs=command-line#create-logs-in-main
 var logger = host.Services.GetRequiredService<ILogger<Program>>();
 logger.LogInformation("Host created. Now running it.");

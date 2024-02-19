@@ -19,8 +19,14 @@ public class HeartRateZoneWorker(
         producer.InitTransactions(_defaultTimeout);
         consumer.Subscribe(BiometricsImportedTopicName);
         
+        // Methods that take a CancellationToken as an argument periodically check the token to see if they should cancel their operation and return.
         while (!stoppingToken.IsCancellationRequested)
         {
+            // If there are no more messages to process, the Consume method will not return null or exit immediately;
+            // instead, it will continue to wait for new messages (blocking behavior).
+            // While the Consume method does block the current thread it's running on (waiting for new messages),
+            // it does not block other threads in your application or make the entire application slow.
+            // Other background services or tasks will continue to run normally in separate threads.
             var result = consumer.Consume(stoppingToken);
             logger.LogInformation("Message Received: {0}", result.Message.Value);
             await HandleMessage(result.Message.Value, stoppingToken);
@@ -39,6 +45,7 @@ public class HeartRateZoneWorker(
                 consumer.Position(topicPartition))); // consumer.Position gets the current position (offset) for the specified topic / partition.
         
         producer.BeginTransaction();
+        // Send the current offsets (the position in the topic/partition it has consumed up to) to the transaction.
         producer.SendOffsetsToTransaction(offsets, consumer.ConsumerGroupMetadata, _defaultTimeout);
         
         try
