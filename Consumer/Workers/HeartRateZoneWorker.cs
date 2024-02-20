@@ -27,7 +27,7 @@ public class HeartRateZoneWorker(
             // While the Consume method does block the current thread it's running on (waiting for new messages),
             // it does not block other threads in your application or make the entire application slow.
             // Other background services or tasks will continue to run normally in separate threads.
-            var result = consumer.Consume(stoppingToken);
+            var result = consumer.Consume(stoppingToken); // The OFFSET of this message can be viewed using: result.TopicPartitionOffset
             logger.LogInformation("Message Received: {0}", result.Message.Value);
             await HandleMessage(result.Message.Value, stoppingToken);
             
@@ -42,10 +42,13 @@ public class HeartRateZoneWorker(
     {
         var offsets = consumer.Assignment.Select(topicPartition => 
             new TopicPartitionOffset(topicPartition,
-                consumer.Position(topicPartition))); // consumer.Position gets the current position (offset) for the specified topic / partition.
+                // Gets the current position (offset) for the specified topic / partition.
+                // The offset field of each requested partition will be set to the offset of the last consumed message + 1.
+                consumer.Position(topicPartition)));
         
         producer.BeginTransaction();
-        // Send the current offsets (the position in the topic/partition it has consumed up to) to the transaction.
+        // Send the offsets of next consume positions to the transaction, indicating where the consumer is ready to consume next. 
+        // For eg: When you COMMIT OFFSET 3, you're telling Kafka that your consumer has successfully processed the record at offset 2 and is ready to consume the record at offset 3.
         producer.SendOffsetsToTransaction(offsets, consumer.ConsumerGroupMetadata, _defaultTimeout);
         
         try
