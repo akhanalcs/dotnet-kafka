@@ -80,15 +80,15 @@ Offset represents the position of a record within a partition of a topic, simila
 ### Committed Offsets
 The concept of committed comes only when there is a consumer group.
 
-For eg:
+When a consumer reads messages from a partition, it keeps track of the last processed offset.
 
-<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/e6899399-939c-4137-8f2c-ba16b83c3fa3">
+The committed offset points to the next message that will be processed in the future.
 
-Here message `14` is being consumed by the Consumer. The offset is at message `2` and `10`. The messages at the offset position and all to the right are consumed by the Consumer.
+For eg: When you commit offset 3, you're telling Kafka that your consumer has successfully processed the record upto offset 2 and is ready to consume the record at offset 3.
 
-"Committing an offset" is indicating that we've successfully processed all records up to that point.
+Each partition of a Kafka topic has its own set of offsets, which indicate the last message that was successfully processed by the consumer group for that partition.
 
-So in essence, each partition of a Kafka topic has its own set of offsets, which indicate the last message that was successfully processed by the consumer group for that partition.
+So in essence, "committing an offset" is indicating that we've successfully processed all records up to that point.
 
 ### Cluster
 A cluster in Kafka is a group of servers (nodes) working together for three reasons:
