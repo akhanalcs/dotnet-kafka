@@ -10,6 +10,7 @@ It has numerous use cases, including distributed logging, stream processing and 
 3. [How Kafka works](https://www.confluent.io/blog/apache-kafka-intro-how-kafka-works/)(Great!)
 4. [confluent kafka dotnet examples](https://github.com/confluentinc/confluent-kafka-dotnet/tree/master/examples)
 5. [Apache Kafka for .NET developers](https://developer.confluent.io/courses/apache-kafka-for-dotnet/overview/)(Great!)
+6. [Kafka Visualization](https://softwaremill.com/kafka-visualisation/)(Great!)
 
 ## Terminology
 ### Event
@@ -70,6 +71,24 @@ In Kafka, data (individual pieces of data are events) are stored within logical 
 <img width="600" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/23ac25ca-e062-4c98-bad3-ef3d50f1a1bf">
 
 Imagine running those broker 1,2,3 pods inside a Kubernetes cluster. Now you have Kafka cluster inside a Kubernetes cluster!
+
+### Offset
+Offset represents the position of a record within a partition of a topic, similar to how an index works in an array. Any particular message in a topic partition is identified by this unique offset.
+
+<img width="500" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/5c2a7c9a-2374-4c07-ab33-fc8468fecf03">
+
+### Committed Offsets
+The concept of committed comes only when there is a consumer group.
+
+When a consumer reads messages from a partition, it keeps track of the last processed offset.
+
+The committed offset points to the next message that will be processed in the future.
+
+For eg: When you commit offset 3, you're telling Kafka that your consumer has successfully processed the record upto offset 2 and is ready to consume the record at offset 3.
+
+Each partition of a Kafka topic has its own set of offsets, which indicate the last message that was successfully processed by the consumer group for that partition.
+
+So in essence, "committing an offset" is indicating that we've successfully processed all records up to that point.
 
 ### Cluster
 A cluster in Kafka is a group of servers (nodes) working together for three reasons:
@@ -786,7 +805,9 @@ If the same sequence number is sent twice, then it will be de-duplicated.
 ```
 
 ## Transactional Commits
-In the previous exercise, we implemented a basic consumer for our topic. One key aspect of that **consumer** is that it was set up to do **automatic** commits. As a result, if something failed to process, it may be committed anyway, and the message may be lost.
+If we are consuming data from Kafka and producing new records to Kafka with no other external storage, then we can rely on Kafka transactions.
+
+In the previous exercise, we implemented a basic consumer for our topic. One key aspect of that **consumer** is that it was set up to do **automatic** commits (after consuming the message). As a result, if something failed to process, it may be committed anyway, and the message may be lost.
 
 We are going to switch from automatic commits to **transactional** commits (```json"EnableAutoCommit": false```).
 
@@ -869,11 +890,118 @@ Now our Consumer will also produce `HeartRateZoneReached` messages, so we need t
 ```
 
 ### Implement Heart Rate Zones
+https://github.com/akhanalcs/dotnet-kafka/blob/82c4b0888b68897e6288155cc4fa88436c069a40/Consumer/Domain/HeartRateExtensions.cs#L1-L24
+
+### Test 1
+The offset of the message is 0 (check Test 3 below). So the offsets of the next consume positions look like this:
+<p align="left">
+  <img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/47a862e8-5ce1-4d2b-af71-7ce7e5af4e1a">
+&nbsp;
+  <img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/e88f66b5-f77e-45f8-b995-c176bc901624">
+</p>
+
+This makes sense because `BiometricsImported` topic has 6 partitions and just 1 message was in Partition 1 at Offset 0.
+
+Remember that offset is committed after we consume it and commit the offset.
+points to the message that's consumed. Message at offset 0 will consumed and the commit will be  be is at the message that's been processed. 
+
+0-1
+1-2
+2-3
+3-
+4-
+5-
+
+### Test 2
+Now send this data to the `/biometrics` endpoint in Producer.
+
+```json
+{
+  "deviceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "heartRates": [
+    {
+      "dateTime": "2022-12-02T13:50:00.000Z",
+      "value": 90
+    },
+   {
+      "dateTime": "2022-12-02T13:51:00.000Z",
+      "value": 110
+    },
+   {
+      "dateTime": "2022-12-02T13:52:00.000Z",
+      "value": 130
+    },
+   {
+      "dateTime": "2022-12-02T13:53:00.000Z",
+      "value": 150
+    },
+   {
+      "dateTime": "2022-12-02T13:54:00.000Z",
+      "value": 170
+    },
+   {
+      "dateTime": "2022-12-02T13:55:00.000Z",
+      "value": 190
+    }
+  ],
+  "maxHeartRate": 200
+}
+```
+
+<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/b8c70396-e15c-434e-86c0-fb77a36de2ae">
+
+As soon as that call succeeds, you'll get here in Consumer project
+
+<img width="750" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/66bc6d3f-b2d8-404f-acc5-dc551a943d2b">
+
+The `offsets` look like this
+
+<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/8320d867-d464-474c-8941-9a7c21497e52">
+
+Also you can look at the Topics in Confluent cloud
+
+<img width="650" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/9a7c0e4f-539a-4b6f-a8a3-8b7317ea2e6d">
+
+After `HandleMessage` method in `Consumer/Workers/HeartRateZoneWorker.cs` runs to completion, you'll see 5 messages in `HeartRateZoneReached` topic
+
+<img width="700" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/3f670057-ad1f-476f-938f-c08692ee97d1">
+
+So, in essence, this worker ensures that processing each `Biometrics` message and producing `HeartRateZoneReached` messages is an atomic operation: either everything happens or nothing happens.
+
+### Test 3
+Send this over
+```json
+{
+  "deviceId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "heartRates": [
+    {
+      "dateTime": "2022-12-02T13:50:00.000Z",
+      "value": 90
+    },
+   {
+      "dateTime": "2022-12-02T13:51:00.000Z",
+      "value": 110
+    }
+  ],
+  "maxHeartRate": 200
+}
+```
+
+It'll go to `BiometricsImported`
+
+<img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f43846c5-0f0e-4f3c-8e8d-76481acd1f36">
+
+The offset says 2.
+
+Now when this message appears at the Consumer, you'll also see that the Offset says 2
+
+<img width="500" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/7a9b0684-800e-430d-a47a-15ead4a8a1db">
+
+The `offsets` inside `HandleMessage` shows this
+
+<img width="700" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/7bc3a70a-0190-40d4-a989-068d56541d82">
+
+The reason is in the comments:
 
 
-
-
-
-- Truth: That comports to reality.
-- Maybe true there's a diamond shaped exactly like my head on MARS, but there's no way for us to know that. so we can't really say "oh it's true that there's diamon shaped my head in MARS"
 
