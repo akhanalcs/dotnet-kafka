@@ -40,15 +40,16 @@ public class HeartRateZoneWorker(
 
     private async Task HandleMessage(Biometrics metrics, CancellationToken stoppingToken)
     {
+        // offsets contain the next offset to be processed (i.e., the current position plus one)
         var offsets = consumer.Assignment.Select(topicPartition => 
             new TopicPartitionOffset(topicPartition,
-                // Gets the current position (offset) for the specified topic / partition.
+                // Returns the current position (offset) of the consumer for a specific topic / partition.
                 // The offset field of each requested partition will be set to the offset of the last consumed message + 1.
                 consumer.Position(topicPartition)));
         
         producer.BeginTransaction();
         // Send the offsets of next consume positions to the transaction, indicating where the consumer is ready to consume next. 
-        // For eg: When you COMMIT OFFSET 3, you're telling Kafka that your consumer has successfully processed the record at offset 2 and is ready to consume the record at offset 3.
+        // For eg: When you COMMIT OFFSET 3, you're telling Kafka that your consumer has successfully processed the record upto offset 2 and is ready to consume the record at offset 3.
         producer.SendOffsetsToTransaction(offsets, consumer.ConsumerGroupMetadata, _defaultTimeout);
         
         try

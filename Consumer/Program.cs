@@ -12,6 +12,7 @@ using Consumer.Domain;
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
+//https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration
 //using var host = Host.CreateApplicationBuilder(args).Build();
 //var config = host.Services.GetRequiredService<IConfiguration>(); // This works like below EXCEPT the user secrets part.
 var config = new ConfigurationBuilder()
@@ -62,4 +63,4 @@ using IHost host = builder.Build();
 var logger = host.Services.GetRequiredService<ILogger<Program>>();
 logger.LogInformation("Host created. Now running it.");
 
-await host.RunAsync();
+host.Run();
