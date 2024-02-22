@@ -963,17 +963,19 @@ Send this over
 
 It'll go to `BiometricsImported`
 
-<img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f43846c5-0f0e-4f3c-8e8d-76481acd1f36">
+<img width="300" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f43846c5-0f0e-4f3c-8e8d-76481acd1f36">
 
 The offset says 2 (offset).
 
 Now when this message appears at the Consumer, you'll also see that the Offset says 2.
 
 <img width="500" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/7a9b0684-800e-430d-a47a-15ead4a8a1db">
+<br><br>
 
 The `offsets` inside `HandleMessage` shows 3 (to be committed offset).
 
 <img width="700" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/7bc3a70a-0190-40d4-a989-068d56541d82">
+<br><br>
 
-The reason is in the comments:
+More details is in the comments:
 https://github.com/akhanalcs/dotnet-kafka/blob/17203b0417f9106884a805e90eeb83a67cf9918f/Consumer/Workers/HeartRateZoneWorker.cs#L41-L53
