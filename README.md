@@ -1,8 +1,12 @@
 # dotnet-kafka
+This repo shows 2 microservices written in .NET 8 that produce and consume messages from an Apache Kafka® cluster.  
+It follows [this Confluent guide](https://developer.confluent.io/courses/apache-kafka-for-dotnet/overview/) for the code and few other resources for the lessons.
+
+## Introduction
 Apache Kafka is an event streaming platform used to collect, store and process real time data streams at scale.  
 It has numerous use cases, including distributed logging, stream processing and Pub-Sub Messaging.
 
-<img width="700" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/19978d3c-3f9c-4474-9a3b-995b5ea437ed">
+<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/19978d3c-3f9c-4474-9a3b-995b5ea437ed">
 
 ## Helpful Links
 1. [Data streaming with Apache Kafka](https://developer.confluent.io/)
