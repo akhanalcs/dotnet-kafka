@@ -281,7 +281,8 @@ Go to Home
 Environments -> Add cloud environment
 
 <img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/a569d5b1-58e8-411a-8984-b281a69bcb6f">
-<br>
+<br><br>
+
 Stream Governance Packages -> Essentials -> Begin configuration
 
 #### Select which cloud and region you want to create your Schema Registry and Stream Catalog in
@@ -299,7 +300,7 @@ confluent login
 CLI shows the successful login
 
 <img width="1050" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/6646fbe7-56c9-4e2c-a913-00c0e1e861b3">
-<br>
+<br><br>
 
 ```bash
 confluent environment list
