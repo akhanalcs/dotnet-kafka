@@ -41,13 +41,13 @@ Deciding which messages to write to which partition:
 
 1. If the message has no key (remember event is key-value pair)
    
-   <img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/d889e3aa-6a51-413a-9ca3-f35f48f11eb3">
+   <img width="400" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/d889e3aa-6a51-413a-9ca3-f35f48f11eb3">
 
    The messages are distributed round-robin among the topic partitions.
   
 2. If the message has key
    
-   <img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/5c7866d6-26f6-4e09-a44c-cc5c32ce4949">
+   <img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/5c7866d6-26f6-4e09-a44c-cc5c32ce4949">
 
    Use that key to figure out which partition to put the message into.
 
@@ -116,18 +116,20 @@ broker1 is the leader of Partition 1 and and broker 2 is follower of Partition 1
 There's 1 lead partition and N-1 followers. N is the replication factor.
 
 ## Create projects
-### Clone this repo down
+### Create a new Git repo and clone it down to your local
+For example, I created this one for putting the hands on exercises.
+
 ### Create a new sln file
 ```bash
-Ashishs-MacBook-Pro:dotnet-kafka ashishkhanal$ dotnet new sln
+Ashishs-MacBook-Pro:dotnet-kafka akhanal$ dotnet new sln
 ```
 ### Add a web api project as Producer
-<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/e309d0df-7de6-4fce-a199-467cdcd5bf50">
+<img width="425" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/e309d0df-7de6-4fce-a199-467cdcd5bf50">
 
 ### Add a console app as Consumer
-<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/25394bc5-984c-4eaf-a071-3cb20a8fec59">
+<img width="425" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/25394bc5-984c-4eaf-a071-3cb20a8fec59">
 
-#### Setup appsettings.json
+#### Setup appsettings.json in your console app
 [Reference](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration#alternative-hosting-approach)
 
 Install `Microsoft.Extensions.Hosting` package.
@@ -146,15 +148,14 @@ https://github.com/akhanalcs/dotnet-kafka/blob/7313b07edd0d5e2a947b813aae2598ab5
 dotnet user-secrets init
 ```
 
-This command adds a `UserSecretsId` element, populated with a GUID, to the project file.
-
+This command adds a `UserSecretsId` element, populated with a GUID, to the `.csproj` file.  
 If you want the Producer to also access secrets pointed by this Id, copy this element into the Producer's project file as well.
 
 Now you can store API keys and secrets in there without it being checked into source control.
 
 Right click the project -> Tools -> [.NET User Secrets](https://plugins.jetbrains.com/plugin/10183--net-core-user-secrets)
 
-<img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/507002f2-4517-45f6-b285-8b87a30e981f">
+<img width="400" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/507002f2-4517-45f6-b285-8b87a30e981f">
 
 Put your secrets here
 
@@ -163,16 +164,16 @@ Put your secrets here
 ### Install dependencies
 Manage Nuget Packages
 
-<img width="400" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/7ba0251a-8099-4a36-aed4-b2de91b089d2">
+<img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/7ba0251a-8099-4a36-aed4-b2de91b089d2">
 
 Install it in both projects
 
-<img width="850" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/b85f2175-ac38-4a30-9588-190d444171ff">
+<img width="900" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/b85f2175-ac38-4a30-9588-190d444171ff">
 
 ## Install Java
 Go to [Java Downloads](https://www.oracle.com/java/technologies/downloads/) and install the latest JDK. (JDK 21 as of Feb 2024).
 
-[Not required, so not doing it now]
+**[Not required, so not doing it now]**
 
 ## Local Kafka cluster setup
 ### Install confluent cli
@@ -255,13 +256,13 @@ I gave Confluent Cloud a try instead of local cluster at this time.
 ### Signup
 [Go to Signup page](https://www.confluent.io/confluent-cloud/tryfree/)
 
-I signed up through my Azure account as Pasy As You Go
+I signed up through my Azure account as 'Pay As You Go' plan.
 
 <img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/14b0a2ef-e70f-4b33-b879-50d08f882d86">
 
 Created Confluent org in my Azure account
 
-<img width="750" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/bb0f35be-f95f-461d-abd6-0c2ae5029b1c">
+<img width="600" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/bb0f35be-f95f-461d-abd6-0c2ae5029b1c">
 
 It appears under the RG I created it under
 
@@ -271,6 +272,7 @@ Now go to Confluent cloud by clicking Launch
 
 <img width="300" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/672d9b73-cd46-4a59-9f23-a5c613362b00">
 
+You'll go to this url often, bookmark it if you'd like:  
 https://confluent.cloud/environments
 
 ### Create environment
@@ -279,32 +281,32 @@ Go to Home
 Environments -> Add cloud environment
 
 <img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/a569d5b1-58e8-411a-8984-b281a69bcb6f">
-
--> Create
-
+<br>
 Stream Governance Packages -> Essentials -> Begin configuration
 
-#### Select which cloud and region you want to create your Schema Registry and Stream Catalog in (i.e. where you will be storing the metadata)
-<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/2c57f793-801d-4f67-a07c-07a233ec53a0">
+#### Select which cloud and region you want to create your Schema Registry and Stream Catalog in
+Tell it where you will be storing the metadata.
 
--> Enable
+<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/2c57f793-801d-4f67-a07c-07a233ec53a0">
 
 #### View it using CLI
 ```bash
 confluent login
 ```
 
-<img width="200" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/653fcab1-692d-4c27-b8ae-42ae9561d94f">
+<img width="225" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/653fcab1-692d-4c27-b8ae-42ae9561d94f">
 
 CLI shows the successful login
 
-<img width="1000" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/6646fbe7-56c9-4e2c-a913-00c0e1e861b3">
+<img width="1050" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/6646fbe7-56c9-4e2c-a913-00c0e1e861b3">
+<br>
 
 ```bash
 confluent environment list
 ```
 
 <img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/8efab508-ae07-44d3-9d59-bba678c8630f">
+<br>
 
 Set the new environment I just created as the active environment:
 ```bash
