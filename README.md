@@ -80,10 +80,7 @@ Offset represents the position of a record within a partition of a topic, simila
 ### Committed Offsets
 The concept of committed comes only when there is a consumer group.
 
-When a consumer reads messages from a partition, it keeps track of the last processed offset.
-
-The committed offset points to the next message that will be processed in the future.
-
+The committed offset points to the next message that will be processed in the future.  
 For eg: When you commit offset 3, you're telling Kafka that your consumer has successfully processed the record upto offset 2 and is ready to consume the record at offset 3.
 
 Each partition of a Kafka topic has its own set of offsets, which indicate the last message that was successfully processed by the consumer group for that partition.
@@ -269,6 +266,8 @@ It appears under the RG I created it under
 Now go to Confluent cloud by clicking Launch
 
 <img width="300" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/672d9b73-cd46-4a59-9f23-a5c613362b00">
+
+https://confluent.cloud/environments
 
 ### Create environment
 Go to Home
@@ -1002,6 +1001,4 @@ The `offsets` inside `HandleMessage` shows this
 <img width="700" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/7bc3a70a-0190-40d4-a989-068d56541d82">
 
 The reason is in the comments:
-
-
 
