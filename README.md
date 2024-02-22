@@ -977,5 +977,5 @@ The `offsets` inside `HandleMessage` shows 3 (to be committed offset).
 <img width="700" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/7bc3a70a-0190-40d4-a989-068d56541d82">
 <br><br>
 
-More details is in the comments:
+More details in the comments:
 https://github.com/akhanalcs/dotnet-kafka/blob/17203b0417f9106884a805e90eeb83a67cf9918f/Consumer/Workers/HeartRateZoneWorker.cs#L41-L53
