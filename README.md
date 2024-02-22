@@ -597,21 +597,21 @@ https://github.com/akhanalcs/dotnet-kafka/blob/df7850306df39f57b7f89be05a84077d6
 ### Test it
 Navigate to Swagger page
 
-<img width="200" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/dc04d7e6-0e43-4be8-a929-c570e29a2d77">
+<img width="190" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/dc04d7e6-0e43-4be8-a929-c570e29a2d77">
 
 Click on `/biometrics` and click "Try it out".
 
 Send the request. It succeeds.
 
 <img width="250" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/a842fba4-eaac-4ab2-acd1-a3155e0848a7">
+<br><br>
 
 Check it out in Confluent Cloud.
 
-<img width="650" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/b546a032-9a6b-4997-a7ba-d06e786e1d03">
+<img width="700" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/b546a032-9a6b-4997-a7ba-d06e786e1d03">
 
 ## Consuming Messages from a Topic
-The job of the consumer is to process each message in a topic.  
-Usually, they're processed one at a time in the order they're received.
+The job of the consumer is to process each message in a topic. Usually, they're processed one at a time in the order they're received.
 
 <img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/e41e8ed4-9ccb-4bf6-8f40-8003e57693eb">
 
@@ -626,17 +626,12 @@ However, they may decide that some messages aren't relevant and discard them rat
 
 <img width="400" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/a84a7f8f-2190-47e0-8147-238eefd8935c">
 
-Remember that when messages are produced to a topic, they're assigned a key.  
-That key is used to separate the topic into multiple partitions.
-
-Within each partition, the order of the messages is guaranteed.  
-However, it's not guaranteed across multiple partitions.
+Remember that when messages are produced to a topic, they're assigned a key. That key is used to separate the topic into multiple partitions.  
+Within each partition, the order of the messages is guaranteed. However, it's not guaranteed across multiple partitions.
 
 <img width="400" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/10acb37d-0e46-42b2-8ae3-5ca67f311b02">
 
-When we create a consumer, we assign it a group ID.  
-This ID indicates that multiple instances of the consumer all belong to the same group.  
-Kafka will distribute the partitions among the group members.  
+When we create a consumer, we assign it a group ID. This ID indicates that multiple instances of the consumer all belong to the same group. Kafka will distribute the partitions among the group members.  
 
 This means that in a topic with 30 partitions, you could have up to 30 instances of your consumer all working in parallel.
 
@@ -650,9 +645,9 @@ Each member of the group processes separate partitions.
     "BootstrapServers": "pkc-4rn2p.canadacentral.azure.confluent.cloud:9092",
     "SecurityProtocol": "SaslSsl",
     "SaslMechanism": "PLAIN",
-    "ClientId": "my-dotnet-kafka",
+    "ClientId": "BiometricsService",
     // To identify multiple consumers that all belong to a single group. (Eg: multiple instances of same microservice)
-    "GroupId": "my-dotnet-kafka-group",
+    "GroupId": "BiometricsService",
     // Determines where the consumer should start processing messages if it has no record of a previously committed offset.
     // In other words, if the consumer is unsure where to start processing messages, it will use this setting.
     // Setting it to Earliest will cause the consumer to start from the earliest message it hasn't seen yet.
@@ -668,18 +663,16 @@ Each member of the group processes separate partitions.
 ```
 
 ### Subscribing to a topic
-When we are ready to begin consuming messages, we need to subscribe to a topic.  
-This is done using the Subscribe Method on the consumer.  
-It takes either a single topic name or a collection of multiple topic names.  
-This informs the client which topics we want to consume but it doesn't actually start processing messages.
+When we are ready to begin consuming messages, we need to subscribe to a topic. This is done using the Subscribe Method on the consumer.  
+
+It takes either a single topic name or a collection of multiple topic names. This informs the client which topics we want to consume but it doesn't actually start processing messages.
 
 ```cs
 consumer.Subscribe(BiometricsImportedTopicName);
 ```
 
 ### Consuming a message
-To start processing messages, we use the Consume Method.  
-It will grab the next available message from the topic and return it as the result.
+To start processing messages, we use the Consume Method. It will grab the next available message from the topic and return it as the result.
 ```cs
   consumer.Subscribe(BiometricsImportedTopicName);
 
@@ -712,7 +705,7 @@ We have 1 message in the Topic
 
 The Consumer read it successfully
 
-<img width="500" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/231b46ac-ab86-403d-b2ab-199f50b89a9b">
+<img width="650" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/231b46ac-ab86-403d-b2ab-199f50b89a9b">
 
 ## Delivery Guarantees & Transactions
 ### At least once
@@ -730,7 +723,7 @@ The default behavior of a Kafka consumer is to automatically commit offsets at a
 However, the behavior in .NET is quite different.  
 Let's take a look at a simple example.
 
-Scenario 1
+**Scenario 1**
 ```cs
     while (!stoppingToken.IsCancellationRequested)
     {
@@ -744,7 +737,7 @@ Scenario 1
     }
 ```
 
-Scenario 2
+**Scenario 2**
 ```cs
     while (!stoppingToken.IsCancellationRequested)
     {
@@ -760,7 +753,7 @@ To do this, we start by disabling automatic offset storage.
 ```json
   "KafkaConsumer": {
     // Other stuffs here
-    "EnableAutoCommit": true,
+    "EnableAutoCommit": true, // The auto-commit thread will still commit the offsets to Kafka according to the specified interval
     "AutoCommitIntervalMs": 5000,
     "EnableAutoOffsetStore": false, // <-- This guy
   },
@@ -776,14 +769,13 @@ Now the code looks like this
     }
 ```
 
-In the event of a crash, the offset won't have been stored.
-When we recover, we'll see the message again, giving us the at-least-once guarantee we were looking for.
+In the event of a crash, the offset won't have been stored. When we recover, we'll see the message again, giving us the at-least-once guarantee we were looking for.
 
 ### Effectively once (using the combination of Idempotency and Transaction)
 In order to achieve effectively-once processing, we need to enable some settings on our producer.
 
 Normally, when the producer experiences a write failure, it will retry the message.  
-This can result in duplicates. However, if we enable **idempotence**, then a unique sequence number is included with each write.
+This can result in duplicates. However, if we enable **idempotence** then a unique sequence number is included with each write.
 If the same sequence number is sent twice, then it will be de-duplicated.
 
 ```json
@@ -812,7 +804,7 @@ If we are consuming data from Kafka and producing new records to Kafka with no o
 
 In the previous exercise, we implemented a basic consumer for our topic. One key aspect of that **consumer** is that it was set up to do **automatic** commits (after consuming the message). As a result, if something failed to process, it may be committed anyway, and the message may be lost.
 
-We are going to switch from automatic commits to **transactional** commits (```json"EnableAutoCommit": false```).
+We are going to switch from automatic commits to **transactional** commits (`"EnableAutoCommit": false`).
 
 As we process the messages, we will produce multiple new messages to a separate topic. We want this to happen in a transactional fashion. Either all of the messages get published, or none of them do.
 
@@ -896,26 +888,6 @@ Now our Consumer will also produce `HeartRateZoneReached` messages, so we need t
 https://github.com/akhanalcs/dotnet-kafka/blob/82c4b0888b68897e6288155cc4fa88436c069a40/Consumer/Domain/HeartRateExtensions.cs#L1-L24
 
 ### Test 1
-The offset of the message is 0 (check Test 3 below). So the offsets of the next consume positions look like this:
-<p align="left">
-  <img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/47a862e8-5ce1-4d2b-af71-7ce7e5af4e1a">
-&nbsp;
-  <img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/e88f66b5-f77e-45f8-b995-c176bc901624">
-</p>
-
-This makes sense because `BiometricsImported` topic has 6 partitions and just 1 message was in Partition 1 at Offset 0.
-
-Remember that offset is committed after we consume it and commit the offset.
-points to the message that's consumed. Message at offset 0 will consumed and the commit will be  be is at the message that's been processed. 
-
-0-1
-1-2
-2-3
-3-
-4-
-5-
-
-### Test 2
 Now send this data to the `/biometrics` endpoint in Producer.
 
 ```json
@@ -952,26 +924,25 @@ Now send this data to the `/biometrics` endpoint in Producer.
 ```
 
 <img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/b8c70396-e15c-434e-86c0-fb77a36de2ae">
-
-As soon as that call succeeds, you'll get here in Consumer project
-
-<img width="750" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/66bc6d3f-b2d8-404f-acc5-dc551a943d2b">
-
-The `offsets` look like this
-
-<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/8320d867-d464-474c-8941-9a7c21497e52">
+<br><br>
 
 Also you can look at the Topics in Confluent cloud
 
-<img width="650" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/9a7c0e4f-539a-4b6f-a8a3-8b7317ea2e6d">
+<img width="500" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/9a7c0e4f-539a-4b6f-a8a3-8b7317ea2e6d">
+<br><br>
+
+As soon as above call succeeds, you'll get here in Consumer project
+
+<img width="750" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/66bc6d3f-b2d8-404f-acc5-dc551a943d2b">
+<br><br>
 
 After `HandleMessage` method in `Consumer/Workers/HeartRateZoneWorker.cs` runs to completion, you'll see 5 messages in `HeartRateZoneReached` topic
 
-<img width="700" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/3f670057-ad1f-476f-938f-c08692ee97d1">
+<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/3f670057-ad1f-476f-938f-c08692ee97d1">
 
-So, in essence, this worker ensures that processing each `Biometrics` message and producing `HeartRateZoneReached` messages is an atomic operation: either everything happens or nothing happens.
+So, in essence, this worker ensures that processing each `Biometrics` message and producing `HeartRateZoneReached` messages is an atomic operation/ transaction: either everything happens or nothing happens.
 
-### Test 3
+### Test 2
 Send this over
 ```json
 {
@@ -996,13 +967,13 @@ It'll go to `BiometricsImported`
 
 The offset says 2.
 
-Now when this message appears at the Consumer, you'll also see that the Offset says 2
+Now when this message appears at the Consumer, you'll also see that the Offset says 2.
 
 <img width="500" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/7a9b0684-800e-430d-a47a-15ead4a8a1db">
 
-The `offsets` inside `HandleMessage` shows this
+The `offsets` inside `HandleMessage` shows 3.
 
 <img width="700" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/7bc3a70a-0190-40d4-a989-068d56541d82">
 
 The reason is in the comments:
-
+https://github.com/akhanalcs/dotnet-kafka/blob/17203b0417f9106884a805e90eeb83a67cf9918f/Consumer/Workers/HeartRateZoneWorker.cs#L41-L53
