@@ -6,7 +6,7 @@ It follows [this Confluent guide](https://developer.confluent.io/courses/apache-
 Apache Kafka is an event streaming platform used to collect, store and process real time data streams at scale.  
 It has numerous use cases, including distributed logging, stream processing and Pub-Sub Messaging.
 
-<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/19978d3c-3f9c-4474-9a3b-995b5ea437ed">
+<img width="600" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/19978d3c-3f9c-4474-9a3b-995b5ea437ed">
 
 ## Helpful Links
 1. [Data streaming with Apache Kafka](https://developer.confluent.io/)
@@ -35,8 +35,8 @@ The simplicity of the log as a data structure and the immutability of the conten
 ### Partitioning
 Partitioning takes the single topic log (remember topic is just a log), and breaks it into multiple logs each of which can live on a separate node in the Kafka cluster.
 
-<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/d54600ad-49c8-4a4b-9983-33b4f366600c">
-
+<img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/d54600ad-49c8-4a4b-9983-33b4f366600c">
+<br>
 Deciding which messages to write to which partition:
 
 1. If the message has no key (remember event is key-value pair)
