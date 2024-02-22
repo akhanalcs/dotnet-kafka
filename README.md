@@ -330,7 +330,7 @@ Create cluster -> Basic
 -> Begin configuration
 <br><br>
 <img width="600" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/8b188706-57f3-410e-8af9-de32b2aba91b">
-<br><br>
+<br>
 <img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/ea734e4b-1f4a-4bea-992c-2d03d8d7d021">
 
 -> Launch cluster
@@ -349,7 +349,7 @@ We will need an API Key to allow applications to access our cluster.
 
 -> Create key
 <br><br>
-<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f94892bd-6027-49d7-aa6e-53702ced8a40">
+<img width="400" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f94892bd-6027-49d7-aa6e-53702ced8a40">
 
 Global access -> Next
 
@@ -363,20 +363,44 @@ Download and save the key somewhere for future use.
 <p align="left">
   <img width="250" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/63252f75-54ab-4166-9902-f3635e86ba8f">
 &nbsp;
-  <img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f4e92617-719a-42d2-a464-99a603094ae7">
+  <img width="400" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f4e92617-719a-42d2-a464-99a603094ae7">
 </p>
 
+## Create Topic
+[Reference](https://developer.confluent.io/courses/apache-kafka-for-dotnet/producing-messages-hands-on/#create-a-new-topic)
+
+A topic is an immutable, append-only log of events. Usually, a topic is comprised of the same kind of events.
+
+<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/8338369a-158d-4932-8d82-3b301a85a628">
+<br><br>
+
+Create a new topic, `RawBiometricsImported`, which you will use to produce and consume events.
+
+<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/324d25d8-a71f-4485-86b0-5470d45370d6">
+
+-> Create with defaults
+
+When asked to **Define a data contract** select **Skip** for now.
+
+## Populate config file using API Key file you downloaded earlier
+- The Kafka.BootstrapServers is the Bootstrap server in the file.
+- The Kafka.SaslUsername is the key value in the file.
+- The Kafka.SaslPassword is the secret value in the file.
+- SchemaRegistry.URL is the Stream Governance API endpoint url.<br>
+  <img width="250" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/6a7404d5-b3ec-47b7-9a03-883b53c4ea01">
+- SchemaRegistry.BasicAuthUserInfo is `<key>:<secret>` from the API Key file you downloaded for the Schema Registry.
+
+Store user name and passwords inside `secrets.json` and other details in `appsettings.json`.
+
 ## Kafka Messages
-<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/2c56d72f-9788-437f-9715-2de12d2b3731">
+<img width="500" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/2c56d72f-9788-437f-9715-2de12d2b3731">
 
 ### Event
 A domain event signals something that has happened in the outside world that is of interest to the application.
 
 Events are something that happened in the past. So they are immutable.
 
-Use past tense when naming events.
-
-For eg: UserCreated, UserAddressChanged etc.
+Use past tense when naming events. For eg: `UserCreated`, `UserAddressChanged` etc.
 
 ### Kafka Message Example
 ```cs
@@ -386,14 +410,13 @@ var message = new Message<string, Biometrics>
   Value = metrics
 };
 ```
-If you care about message ordering, provide key, otherwise it's optional.
-
+If you care about message ordering, provide key, otherwise it's optional.  
 In above example, because we're using `DeviceId` as key, all messages of that specific device are handled in order.
 
 Value can be a primitive type such as string or some object that can be serialized into formats such as JSON, Avro or Protobuf.
 
 ## Producing messages to a topic
-<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/1d0706c6-5b6e-465f-ba32-2aef3628dd8d">
+<img width="500" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/1d0706c6-5b6e-465f-ba32-2aef3628dd8d">
 
 You can consider the messages being produced by your system to be just another type of API.
 
@@ -413,85 +436,55 @@ Some APIs will be consumed through HTTP while others might be consumed through K
     // Used to identify the producer.
     // In other words, to give it a name.
     // Although it's not strictly required, providing a ClientId will make debugging a lot easier.
-    "ClientId": "my-dotnet-kafka"
+    "ClientId": "ClientGateway"
   }
 ```
 
 Grab the config
 ```cs
-var producerConfig = builder.Configuration.GetSection("KafkaProducer").Get<ProducerConfig>();
+builder.Services.Configure<ProducerConfig>(builder.Configuration.GetSection("KafkaProducer")); // OR var producerConfig = builder.Configuration.GetSection("KafkaProducer").Get<ProducerConfig>();
 ```
 
-Create the Producer
-```cs
-using var producer = new ProducerBuilder<string, Biometrics>(producerConfig).Build();
-```
-
-Send the message
-```cs
-var result = await producer.ProduceAsync(BiometricsImportedTopicName, message);
-```
-
-The messages aren't necessarily sent immediately.  
-They may be buffered in memory so that multiple messages can be sent as a batch.  
-Once we're sure we want the messages to be sent, it's a good idea to call the Flush method.
-
-```cs
-// Synchronous method, so it will wait for acknowledgement from broker before continuing
-// It's often better to produce multiple messages into a batch prior to calling Flush.
-producer.Flush();
-```
-
-## Create Topic
-[Reference](https://developer.confluent.io/courses/apache-kafka-for-dotnet/producing-messages-hands-on/#create-a-new-topic)
-
-A topic is an immutable, append-only log of events. Usually, a topic is comprised of the same kind of events.
-
-<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/8338369a-158d-4932-8d82-3b301a85a628">
-
-Create a new topic, `RawBiometricsImported`, which you will use to produce and consume events.
-
-<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/324d25d8-a71f-4485-86b0-5470d45370d6">
-
--> Create with defaults
-
-When asked to **Define a data contract** select **Skip**.
-
-## Populate config file using API Key file you downloaded earlier
-- The Kafka.BootstrapServers is the Bootstrap server in the file.
-- The Kafka.SaslUsername is the key value in the file.
-- The Kafka.SaslPassword is the secret value in the file.
-- SchemaRegistry.URL is the Stream Governance API endpoint url.<br>
-  <img width="200" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/6a7404d5-b3ec-47b7-9a03-883b53c4ea01">
-- SchemaRegistry.BasicAuthUserInfo is `<key>:<secret>` from the API Key file you downloaded for the Schema Registry.
-
-Store user name and passwords inside `secrets.json` and other details in `appsettings.json`.
-
-## Produce messages
+## Produce messages in your Web API app
 Go to the web api you created earlier.
 
 It will work as a simple REST endpoint that accepts data from a fitness tracker in the form of strings and pushes it to Kafka with no intermediate processing.
 
 In the long run, this may be dangerous because it could allow a malfunctioning device to push invalid data into our stream. We probably want to perform a minimal amount of validation, prior to pushing the data. We'll do that later.
 
-Register an instance of `IProducer<string, string>`.   
-We use a singleton because the producer maintains connections that we want to reuse.
+Register an instance of `IProducer<string, string>`. We use a singleton because the producer maintains connections that we want to reuse.
 ```cs
-var producerConfig = builder.Configuration.GetSection("KafkaProducer").Get<ProducerConfig>();
-builder.Services.AddSingleton(new ProducerBuilder<string, string>(producerConfig).Build());
+builder.Services.AddSingleton<IProducer<string, string>>(sp =>
+{
+    var config = sp.GetRequiredService<IOptions<ProducerConfig>>();
+    return new ProducerBuilder<string, Biometrics>(config.Value)
+        .Build();
+});
 ```
+
+Send the message
+```cs
+var result = await producer.ProduceAsync(biometricsImportedTopicName, message);
+// Synchronous method, so it will wait for acknowledgement from broker before continuing
+// It's often better to produce multiple messages into a batch prior to calling Flush.
+producer.Flush();
+```
+
+The messages aren't necessarily sent immediately.  
+They may be buffered in memory so that multiple messages can be sent as a batch.  
+Once we're sure we want the messages to be sent, it's a good idea to call the `.Flush()` method.
 
 ### Test it
 #### Start the app
-<img width="200" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f7250701-7d04-4477-bead-6c9c5f83db7e">
+<img width="300" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f7250701-7d04-4477-bead-6c9c5f83db7e">
 
 #### Send a message to the endpoint through Swagger
-<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/a83c9991-e5b9-4256-863a-a9461490aec6">
+<img width="500" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/a83c9991-e5b9-4256-863a-a9461490aec6">
 
 #### Verify it in the cluster
 Home -> Environments -> kafka-with-dotnet -> cluster_0 -> Topics
 
-<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/974b3b19-fa64-4402-8e40-8b2b3b48cfc1">
+<img width="500" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/974b3b19-fa64-4402-8e40-8b2b3b48cfc1">
 
 ## Serialization & Deserialization
 The message producer is created by providing two types. 
@@ -528,9 +521,7 @@ If a matching schema is found,the current message and any future ones that use t
 
 <img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/0448c387-860b-4e1b-863a-5808c65ecd93">
 
-However, if no matching schema is found,then any messages that use that schema will be rejected.  
-Essentially, an exception is thrown.  
-This ensures that each message going to Kafka matches the required format.
+However, if no matching schema is found,then any messages that use that schema will be rejected. Essentially, an exception is thrown. This ensures that each message going to Kafka matches the required format.
 
 ## Schemas & Serialization
 ### Create a new topic
@@ -538,9 +529,10 @@ Create a new topic named `BiometricsImported` (use the default partitions).
 
 Define a data contract -> Create a schema for message values
 
-<img width="500" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/bf734225-8385-4252-b79a-6c9334a41ebb">
+<img width="400" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/bf734225-8385-4252-b79a-6c9334a41ebb">
 
 -> Create Schema
+<br><br>
 
 <img width="600" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/04a1e110-e193-44c0-b6da-fc3c4f8fae09">
 
@@ -590,11 +582,14 @@ Copy paste the above JSON into https://codebeautify.org/jsonviewer and add your 
 ```
 
 In above step, essentially you were just mapping these records into a JSON format
-https://github.com/akhanalcs/dotnet-kafka/blob/e05177c04bc471b17fdb081db8afcc952d3473d5/Producer/Program.cs#L41-L42
+```cs
+record Biometrics(Guid DeviceId, List<HeartRate> HeartRates, int MaxHeartRate);
+record HeartRate(DateTime DateTime, int Value);
+```
 
 ### Connect the app to Schema Registry
 Add 2 packages:
-https://github.com/akhanalcs/dotnet-kafka/blob/df7850306df39f57b7f89be05a84077d6a773577/Producer/Producer.csproj#L13C1-L14C92
+https://github.com/akhanalcs/dotnet-kafka/blob/df7850306df39f57b7f89be05a84077d6a773577/Producer/Producer.csproj#L13-L14
 
 Register an instance of a `ISchemaRegistryClient` using a `new CachedSchemaRegistryClient`
 https://github.com/akhanalcs/dotnet-kafka/blob/df7850306df39f57b7f89be05a84077d6a773577/Producer/Program.cs#L29-L34
