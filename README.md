@@ -307,14 +307,14 @@ confluent environment list
 ```
 
 <img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/8efab508-ae07-44d3-9d59-bba678c8630f">
-<br>
+<br><br>
 
 Set the new environment I just created as the active environment:
 ```bash
 confluent environment use env-19vow5
 ```
 
-Now the `*` has changed
+Notice that the `*` has changed
 
 <img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/3f73b8fa-4c31-40dd-90aa-5260aec5400c">
 
@@ -322,15 +322,15 @@ Now the `*` has changed
 <img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f1070fff-b389-409f-baf9-27078918b2b2">
 
 -> Create cluster on my own
-
+<br><br>
 Create cluster -> Basic
 
-<img width="200" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/de308359-313f-4346-a51b-0caf12e2470e">
+<img width="190" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/de308359-313f-4346-a51b-0caf12e2470e">
 
 -> Begin configuration
-
+<br><br>
 <img width="600" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/8b188706-57f3-410e-8af9-de32b2aba91b">
-<br>
+<br><br>
 <img width="350" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/ea734e4b-1f4a-4bea-992c-2d03d8d7d021">
 
 -> Launch cluster
@@ -348,21 +348,23 @@ We will need an API Key to allow applications to access our cluster.
 <img width="600" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/55e85853-d27f-4e01-b5c2-c9c76995f0bc">
 
 -> Create key
-
-<img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f94892bd-6027-49d7-aa6e-53702ced8a40">
+<br><br>
+<img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f94892bd-6027-49d7-aa6e-53702ced8a40">
 
 Global access -> Next
 
 Download and save the key somewhere for future use.
 
-### Add an API key for Schema Registry (Environment level)
+### Add an API key for Schema Registry (It's at Environment level)
 1. From the main menu (top right) or the breadcrumb navigation (top) select **Environments**.
 2. Select the **kafka-with-dotnet** environment.
 3. In the right-hand menu there should be an option to **Add key**. Select it and create a new API Key.
 
-<img width="250" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/63252f75-54ab-4166-9902-f3635e86ba8f">
-<br>
-<img width="250" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f4e92617-719a-42d2-a464-99a603094ae7">
+<p align="left">
+  <img width="250" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/63252f75-54ab-4166-9902-f3635e86ba8f">
+&nbsp;
+  <img width="450" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/f4e92617-719a-42d2-a464-99a603094ae7">
+</p>
 
 ## Kafka Messages
 <img width="550" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/2c56d72f-9788-437f-9715-2de12d2b3731">
