@@ -979,3 +979,6 @@ The `offsets` inside `HandleMessage` shows 3 (to be committed offset).
 
 More details in the comments:
 https://github.com/akhanalcs/dotnet-kafka/blob/17203b0417f9106884a805e90eeb83a67cf9918f/Consumer/Workers/HeartRateZoneWorker.cs#L41-L53
+
+## [Delete Confluent organization](https://learn.microsoft.com/en-us/azure/partner-solutions/apache-kafka-confluent-cloud/manage?tabs=azure-portal#delete-confluent-organization)
+<img width="800" alt="image" src="https://github.com/akhanalcs/dotnet-kafka/assets/30603497/37eeb0e3-f3c9-4b38-aabb-9b3c79143720">
