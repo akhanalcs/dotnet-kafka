@@ -175,7 +175,7 @@ Go to [Java Downloads](https://www.oracle.com/java/technologies/downloads/) and 
 
 **[Not required, so not doing it now]**
 
-## Local Kafka cluster setup
+## Local Kafka cluster setup [Not doing it now, so skip this]
 ### Install confluent cli
 ```bash
 brew install confluentinc/tap/cli
