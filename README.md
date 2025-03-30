@@ -242,6 +242,11 @@ export PATH=$PATH:$CONFLUENT_HOME/bin
 
 Hit `Esc`, type `:wq` and hit enter to save and quit.
 
+Check your changes
+```bash
+cat .bash_profile
+```
+
 Reload the bash profile file using the source command:
 ```bash
 source ~/.bash_profile
